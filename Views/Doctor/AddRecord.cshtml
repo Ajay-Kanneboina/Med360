@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Add Record";
+}
+
+<div class="page-h">Add Medical Record</div>
+<p class="page-s">Patient: @ViewBag.PatientName</p>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mb-3">@ViewBag.Error</div>
+}
+
+<form method="post" action="/Doctor/AddRecord" style="max-width:680px;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="patientId" value="@ViewBag.PatientId" />
+
+    <div class="sbox">
+        <div class="slabel">Clinical Details</div>
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Diagnosis</label>
+                <input type="text" name="diagnosis" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Visit Date</label>
+                <input type="date" name="visitDate" class="form-control"
+                       value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-12">
+                <label class="form-label">Treatment Plan</label>
+                <textarea name="treatment" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Notes (optional)</label>
+                <textarea name="notes" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4">Save Record</button>
+        <a href="/Doctor/PatientDetail/@ViewBag.PatientId" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>

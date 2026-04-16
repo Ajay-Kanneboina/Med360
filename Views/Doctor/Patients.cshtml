@@ -1,0 +1,85 @@
+@model List<MediCore.Models.Patient>
+@{
+    ViewData["Title"] = "Patients";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <div class="page-h">Patients</div>
+        <p class="page-s">@Model.Count patient(s) registered</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header px-3 py-2">
+        <form method="get" class="d-flex gap-2">
+            <div class="input-group" style="max-width:300px;">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted" style="font-size:.82rem;"></i>
+                </span>
+                <input type="text" name="search" value="@ViewBag.Search"
+                       class="form-control border-start-0"
+                       placeholder="Search name or email" />
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <a href="/Doctor/Patients" class="btn btn-outline-secondary">Clear</a>
+            }
+        </form>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-people" style="font-size:2.5rem;opacity:.3;"></i>
+                <p class="mt-3 mb-0 fw-semibold">No patients found</p>
+            </div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date of Birth</th>
+                        <th>Blood Group</th>
+                        <th>Phone</th>
+                        <th>Registered</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@p.FullName</div>
+                                <div class="text-muted" style="font-size:.75rem;">@(p.Email ?? "")</div>
+                            </td>
+                            <td class="text-muted">@p.DateOfBirth.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(p.BloodGroup))
+                                {
+                                    <span style="background:#fee2e2;color:#991b1b;border-radius:20px;padding:2px 9px;font-size:.74rem;font-weight:600;">
+                                        @p.BloodGroup
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-muted">@(p.Phone ?? "—")</td>
+                            <td class="text-muted">@p.RegisteredOn.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <a href="/Doctor/PatientDetail/@p.Id"
+                                   class="btn btn-sm btn-outline-primary" style="font-size:.8rem;">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

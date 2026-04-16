@@ -1,0 +1,131 @@
+@model MediCore.Models.Complaint
+@{
+    ViewData["Title"] = "View Complaint";
+    var pat           = Model.Patient;
+    bool isActive     = Model.Status == "Active";
+    bool isReviewed   = Model.Status == "Reviewed";
+    bool isResolved   = Model.Status == "Resolved";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <div class="page-h">Patient Complaint</div>
+        <p class="page-s">From @pat?.FullName — @Model.SubmittedAt.ToString("dd MMM yyyy")</p>
+    </div>
+    <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="sbox mb-3">
+            <div class="slabel">Patient's Problem</div>
+            <p style="font-size:.92rem;line-height:1.75;margin-bottom:0;">@Model.Description</p>
+
+            @if (!string.IsNullOrEmpty(Model.AdditionalNotes))
+            {
+                <div class="mt-3 pt-3" style="border-top:1px solid #f0f3f8;">
+                    <div style="font-size:.75rem;font-weight:700;color:#8faac4;text-transform:uppercase;margin-bottom:6px;">
+                        Additional Notes
+                    </div>
+                    <p style="font-size:.87rem;margin:0;color:#4a5568;">@Model.AdditionalNotes</p>
+                </div>
+            }
+
+            <div class="mt-3 d-flex gap-3" style="font-size:.79rem;color:#8faac4;">
+                <span><i class="bi bi-clock me-1"></i>Submitted @Model.SubmittedAt.ToString("dd MMM yyyy, hh:mm tt")</span>
+                @if (Model.UpdatedAt.Date != Model.SubmittedAt.Date)
+                {
+                    <span><i class="bi bi-pencil me-1"></i>Updated @Model.UpdatedAt.ToString("dd MMM yyyy, hh:mm tt")</span>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.DoctorResponse))
+        {
+            <div class="sbox" style="background:#f0fdf4;">
+                <div class="slabel">Previous Response</div>
+                <p style="font-size:.88rem;margin:0;">@Model.DoctorResponse</p>
+                <div class="mt-2" style="font-size:.78rem;color:#8faac4;">
+                    By @Model.RespondedBy on @Model.RespondedAt?.ToString("dd MMM yyyy")
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="sbox mb-3">
+            <div class="slabel">Respond to Patient</div>
+            <form method="post" action="/Doctor/Respond">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="mb-3">
+                    <label class="form-label">Your Response</label>
+                    <textarea name="response" class="form-control" rows="5" required>@Model.DoctorResponse</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Update Status</label>
+                    <select name="status" class="form-select">
+                        @if (isActive)
+                        {
+                            <option value="Active" selected>Active — needs more attention</option>
+                        }
+                        else
+                        {
+                            <option value="Active">Active — needs more attention</option>
+                        }
+                        @if (isReviewed)
+                        {
+                            <option value="Reviewed" selected>Reviewed — responded</option>
+                        }
+                        else
+                        {
+                            <option value="Reviewed">Reviewed — responded</option>
+                        }
+                        @if (isResolved)
+                        {
+                            <option value="Resolved" selected>Resolved — case closed</option>
+                        }
+                        else
+                        {
+                            <option value="Resolved">Resolved — case closed</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-reply me-2"></i>Send Response
+                </button>
+            </form>
+        </div>
+
+        <div class="sbox">
+            <div class="slabel">Patient Info</div>
+            <div class="irow">
+                <span class="ilbl">Name</span>
+                <span>@(pat?.FullName ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Date of Birth</span>
+                <span>@(pat?.DateOfBirth.ToString("dd MMM yyyy") ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Blood Group</span>
+                <span>@(pat?.BloodGroup ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Phone</span>
+                <span>@(pat?.Phone ?? "—")</span>
+            </div>
+            @if (pat != null)
+            {
+                <div class="mt-2 pt-1">
+                    <a href="/Doctor/PatientDetail/@pat.Id"
+                       class="btn btn-sm btn-outline-secondary w-100" style="font-size:.8rem;">
+                        View Full Profile
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

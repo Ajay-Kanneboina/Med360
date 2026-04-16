@@ -1,0 +1,74 @@
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Register — MediCore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body { margin:0; font-family:'Segoe UI',sans-serif; background:#f6f7fb; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+        .box { background:#fff; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.09); width:480px; padding:38px 42px; }
+        .brand { display:flex; align-items:center; gap:8px; font-weight:700; color:#1e2d45; margin-bottom:22px; }
+        h2  { font-size:1.1rem; font-weight:700; color:#1e2d45; margin-bottom:4px; }
+        .sub { font-size:.82rem; color:#94a3b8; margin-bottom:20px; }
+        .form-label { font-weight:600; font-size:.79rem; color:#4a5568; }
+        .form-control, .form-select { border:1px solid #dde3ee; border-radius:6px; font-size:.87rem; }
+        .form-control:focus, .form-select:focus { border-color:#1e2d45; box-shadow:0 0 0 3px rgba(30,45,69,.1); outline:none; }
+        .btn-go { background:#1e2d45; color:#fff; border:none; border-radius:7px; width:100%; padding:10px; font-weight:600; cursor:pointer; font-size:.9rem; margin-top:4px; }
+        .btn-go:hover { background:#162336; }
+        .err  { background:#fef2f2; color:#991b1b; border-radius:7px; padding:9px 12px; font-size:.82rem; margin-bottom:12px; }
+        .sec  { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#94a3b8; border-bottom:1px solid #f0f3f8; padding-bottom:7px; margin:16px 0 12px; }
+        .note { background:#eff6ff; border-radius:6px; padding:8px 12px; font-size:.79rem; color:#1d4ed8; margin-top:6px; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="brand"><i class="bi bi-heart-pulse-fill text-danger fs-5"></i> MediCore</div>
+    <h2>Create Account</h2>
+    <p class="sub">Register to get started</p>
+    @if (ViewBag.Error != null)
+    {
+        <div class="err"><i class="bi bi-exclamation-circle me-1"></i>@ViewBag.Error</div>
+    }
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <div class="sec">Your Details</div>
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="fullName" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required />
+        </div>
+        <div class="mb-1">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select" required>
+                <option value="">Select role</option>
+                <option value="Patient">Patient</option>
+                <option value="Doctor">Doctor</option>
+                <option value="Admin">Admin</option>
+                <option value="Receptionist">Receptionist</option>
+            </select>
+            <div class="note"><i class="bi bi-info-circle me-1"></i>Patients: use the same email registered at the clinic to link your records automatically.</div>
+        </div>
+        <div class="sec">Password</div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required minlength="6" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Confirm</label>
+                <input type="password" name="confirmPassword" class="form-control" required />
+            </div>
+        </div>
+        <button type="submit" class="btn-go">Create Account</button>
+        <div class="text-center mt-3" style="font-size:.81rem;color:#94a3b8;">
+            Already registered? <a href="/Account/Login" style="color:#1e2d45;font-weight:600;text-decoration:none;">Sign in</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

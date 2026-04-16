@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — My Health</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body  { margin:0; font-family:'Segoe UI',sans-serif; font-size:14px; background:#f4f7f4; }
+        .pnav { background:#fff; border-bottom:1px solid #d1e7dd; height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; position:sticky; top:0; z-index:50; }
+        .pnav-brand { font-weight:700; color:#146c43; text-decoration:none; display:flex; align-items:center; gap:8px; }
+        .pnav-links a { color:#495057; text-decoration:none; font-size:.86rem; padding:6px 12px; border-radius:6px; margin-left:2px; }
+        .pnav-links a:hover { background:#d1fae5; color:#146c43; }
+        .pnav-on  { background:#d1fae5; color:#146c43 !important; font-weight:600; }
+        .pchip    { display:flex; align-items:center; gap:7px; background:#f0fdf4; border:1px solid #a7f3d0; border-radius:50px; padding:4px 14px 4px 6px; font-size:.81rem; color:#146c43; }
+        .pchip-dot { width:28px; height:28px; border-radius:50%; background:#16a34a; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.78rem; }
+        .page     { max-width:960px; margin:0 auto; padding:26px 18px; }
+        .card     { border:none; border-radius:9px; box-shadow:0 1px 5px rgba(0,0,0,.07); }
+        .card-header { background:#fff; border-bottom:1px solid #eef2f7; font-weight:600; font-size:.9rem; border-radius:9px 9px 0 0 !important; }
+        .table    { font-size:.86rem; }
+        .table thead th { background:#f7f9fc; color:#6b7fa3; font-weight:600; border-bottom:2px solid #eaeef5; }
+        .table td { border-bottom:1px solid #f0f3f8; vertical-align:middle; }
+        .table tr:last-child td { border-bottom:none; }
+        .form-label { font-weight:600; font-size:.79rem; color:#4a5568; margin-bottom:4px; }
+        .form-control, .form-select { border:1px solid #dde3ee; border-radius:6px; font-size:.87rem; }
+        .form-control:focus, .form-select:focus { border-color:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.12); outline:none; }
+        .btn-g    { background:#16a34a; color:#fff; border:none; border-radius:6px; padding:9px 20px; font-weight:600; font-size:.88rem; cursor:pointer; }
+        .btn-g:hover { background:#15803d; color:#fff; }
+        .tile     { background:#fff; border-radius:9px; padding:16px 18px; box-shadow:0 1px 5px rgba(0,0,0,.07); display:flex; align-items:center; gap:14px; }
+        .tile-ic  { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+        .tile-n   { font-size:1.5rem; font-weight:700; color:#1e2d45; line-height:1; }
+        .tile-l   { font-size:.77rem; color:#8faac4; margin-top:2px; }
+        .pill     { border-radius:20px; padding:2px 10px; font-size:.74rem; font-weight:600; }
+        .pill-a   { background:#fef9c3; color:#854d0e; }
+        .pill-r   { background:#dbeafe; color:#1d4ed8; }
+        .pill-d   { background:#dcfce7; color:#166534; }
+        .pill-x   { background:#f1f5f9; color:#475569; }
+        .resp-box { background:#f0fdf4; border:1px solid #a7f3d0; border-radius:8px; padding:14px 16px; font-size:.88rem; }
+        .sbox     { background:#fff; border-radius:9px; padding:18px; box-shadow:0 1px 5px rgba(0,0,0,.07); margin-bottom:16px; }
+        .slabel   { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#8faac4; border-bottom:1px solid #f0f3f8; padding-bottom:8px; margin-bottom:14px; }
+        .irow     { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid #f0f3f8; font-size:.87rem; }
+        .irow:last-child { border-bottom:none; }
+        .ilbl     { color:#8faac4; font-weight:600; }
+        .alert    { border:none; border-radius:7px; font-size:.86rem; }
+    </style>
+</head>
+<body>
+@{
+    var pname = Context.Session.GetString("UserName") ?? "";
+    var ppath = Context.Request.Path.Value ?? "";
+    string initial = pname.Length > 0 ? pname[..1].ToUpper() : "P";
+}
+<nav class="pnav">
+    <a href="/Patient/Dashboard" class="pnav-brand">
+        <i class="bi bi-heart-pulse-fill"></i> My Health
+    </a>
+    <div class="pnav-links">
+        <a href="/Patient/Dashboard"    class="@(ppath == "/Patient/Dashboard" ? "pnav-on" : "")">Home</a>
+        <a href="/Patient/MyComplaints" class="@(ppath.Contains("/Patient/MyComplaints") || ppath.Contains("/Patient/SubmitComplaint") || ppath.Contains("/Patient/EditComplaint") ? "pnav-on" : "")">My Problems</a>
+        <a href="/Patient/MyRecords"    class="@(ppath.Contains("/Patient/MyRecords") ? "pnav-on" : "")">My Records</a>
+        <a href="/Patient/MyProfile"    class="@(ppath.Contains("/Patient/MyProfile") ? "pnav-on" : "")">My Profile</a>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="pchip">
+            <div class="pchip-dot">@initial</div>
+            @pname
+        </div>
+        <form method="post" action="/Account/Logout" class="ms-2">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-outline-secondary" style="font-size:.8rem;">
+                <i class="bi bi-box-arrow-right me-1"></i>Sign Out
+            </button>
+        </form>
+    </div>
+</nav>
+<div class="page">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert mb-3" style="background:#f0fdf4;color:#166534;">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mb-3">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Error"]
+        </div>
+    }
+    @RenderBody()
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

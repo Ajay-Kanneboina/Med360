@@ -1,0 +1,73 @@
+@model List<MediCore.Models.Complaint>
+@{
+    ViewData["Title"] = "My Problems";
+    Layout = "_PatientLayout";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h5 class="fw-bold mb-1" style="color:#1e2d45;">My Problems</h5>
+        <p class="text-muted mb-0" style="font-size:.83rem;">Problems you have submitted to the doctor</p>
+    </div>
+    <a href="/Patient/SubmitComplaint" class="btn btn-g">
+        <i class="bi bi-plus-lg me-1"></i>Report New Problem
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card p-5 text-center text-muted">
+        <i class="bi bi-chat-square-text" style="font-size:2.5rem;opacity:.3;"></i>
+        <p class="mt-3 mb-2 fw-semibold">No problems submitted yet</p>
+        <a href="/Patient/SubmitComplaint" class="btn btn-g btn-sm">Report a Problem</a>
+    </div>
+}
+else
+{
+    @foreach (var c in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="pill @(c.Status == "Active" ? "pill-a" : c.Status == "Reviewed" ? "pill-r" : "pill-d") me-2">
+                            @c.Status
+                        </span>
+                        <span class="text-muted" style="font-size:.79rem;">
+                            Submitted @c.SubmittedAt.ToString("dd MMM yyyy")
+                        </span>
+                        @if (c.UpdatedAt.Date != c.SubmittedAt.Date)
+                        {
+                            <span class="text-muted" style="font-size:.79rem;"> · Updated @c.UpdatedAt.ToString("dd MMM yyyy")</span>
+                        }
+                    </div>
+                    @if (c.Status == "Active")
+                    {
+                        <a href="/Patient/EditComplaint/@c.Id"
+                           class="btn btn-sm btn-outline-secondary" style="font-size:.79rem;">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                    }
+                </div>
+
+                <p class="fw-semibold mb-1" style="font-size:.9rem;">@c.Description</p>
+
+                @if (!string.IsNullOrEmpty(c.AdditionalNotes))
+                {
+                    <p class="text-muted mb-2" style="font-size:.84rem;">@c.AdditionalNotes</p>
+                }
+
+                @if (!string.IsNullOrEmpty(c.DoctorResponse))
+                {
+                    <div class="resp-box mt-3">
+                        <div style="font-size:.78rem;font-weight:600;color:#166534;margin-bottom:4px;">
+                            <i class="bi bi-reply me-1"></i>
+                            @c.RespondedBy replied on @c.RespondedAt?.ToString("dd MMM yyyy")
+                        </div>
+                        <div style="font-size:.87rem;">@c.DoctorResponse</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
