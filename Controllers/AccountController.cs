@@ -19,9 +19,21 @@ namespace MediCore.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult Login(string email, string password)
         {
-            var user = _db.Users.FirstOrDefault(u => u.Email == email && u.IsActive);
+            var user = _db.Users.FirstOrDefault(u => u.Email == email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            if (user == null)
+            {
+                ViewBag.Error = "Invalid email or password.";
+                return View();
+            }
+
+            if (!user.IsActive)
+            {
+                ViewBag.Error = "Your account is pending administrator approval. Please wait until an admin approves your account.";
+                return View();
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 ViewBag.Error = "Invalid email or password.";
                 return View();
@@ -37,6 +49,13 @@ namespace MediCore.Controllers
             if (user.Role == "Patient")
                 return RedirectToAction("Dashboard", "Patient");
 
+            if (user.Role == "Doctor")
+                return RedirectToAction("Dashboard", "Doctor");
+
+            if (user.Role == "Admin")
+                return RedirectToAction("Index", "Home");
+
+            // Other staff roles (Receptionist, Nurse) for now go to the main home area
             return RedirectToAction("Index", "Home");
         }
 
@@ -51,6 +70,13 @@ namespace MediCore.Controllers
 
             if (_db.Users.Any(u => u.Email == email))
             { ViewBag.Error = "Email already registered."; return View(); }
+
+            // Prevent self-registration as Admin — admin accounts must be created/approved by an existing admin
+            if (role == "Admin")
+            {
+                ViewBag.Error = "Cannot register as Admin. An administrator must create admin accounts.";
+                return View();
+            }
 
             int? patientId = null;
             if (role == "Patient")
@@ -69,6 +95,9 @@ namespace MediCore.Controllers
                 }
             }
 
+            // Users who request staff roles must be approved by an admin before they can login
+            var isStaffRole = role == "Doctor" || role == "Nurse" || role == "Receptionist";
+
             _db.Users.Add(new User
             {
                 FullName     = fullName,
@@ -76,11 +105,19 @@ namespace MediCore.Controllers
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                 Role         = role,
                 PatientId    = patientId,
-                IsActive     = true
+                IsActive     = !isStaffRole // staff roles are inactive until approved by admin
             });
             _db.SaveChanges();
 
-            TempData["Success"] = "Account created. Please sign in.";
+            if (isStaffRole)
+            {
+                // Inform user that admin approval is required
+                TempData["Info"] = "Your account request has been received. An administrator must approve your account before you can sign in.";
+            }
+            else
+            {
+                TempData["Success"] = "Account created. Please sign in.";
+            }
             return RedirectToAction(nameof(Login));
         }
 

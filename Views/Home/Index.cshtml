@@ -1,14 +1,12 @@
 @{
     ViewData["Title"] = "Dashboard";
-    var complaints = ViewBag.RecentComplaints as List<MediCore.Models.Complaint> ?? new List<MediCore.Models.Complaint>();
-    int nc = (int)(ViewBag.NewComplaints ?? 0);
 }
 
 <div class="page-h">Dashboard</div>
 <p class="page-s">Welcome, @Context.Session.GetString("UserName")</p>
 
 <div class="row g-3 mb-4">
-    <div class="col-sm-4">
+    <div class="col-sm-6">
         <div class="stat d-flex justify-content-between align-items-center">
             <div>
                 <div class="stat-n">@ViewBag.TotalPatients</div>
@@ -17,7 +15,7 @@
             <i class="bi bi-people" style="font-size:1.8rem;opacity:.15;"></i>
         </div>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-6">
         <div class="stat d-flex justify-content-between align-items-center">
             <div>
                 <div class="stat-n">@ViewBag.TotalRecords</div>
@@ -26,67 +24,15 @@
             <i class="bi bi-file-medical" style="font-size:1.8rem;opacity:.15;"></i>
         </div>
     </div>
-    <div class="col-sm-4">
-        <div class="stat d-flex justify-content-between align-items-center" style="@(nc > 0 ? "background:#fef9c3;" : "")">
-            <div>
-                <div class="stat-n" style="@(nc > 0 ? "color:#854d0e;" : "")">@nc</div>
-                <div class="stat-l">Unread Complaints</div>
-            </div>
-            <i class="bi bi-envelope-exclamation" style="font-size:1.8rem;opacity:.15;"></i>
-        </div>
-    </div>
 </div>
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center px-3 py-2">
-        <span>Recent Patient Complaints</span>
-        <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary" style="font-size:.8rem;">View All</a>
-    </div>
-    <div class="card-body p-0">
-        @if (!complaints.Any())
-        {
-            <div class="text-center py-4 text-muted">
-                <i class="bi bi-chat-square-text" style="font-size:2rem;opacity:.3;"></i>
-                <p class="mt-2 mb-0 small">No complaints yet.</p>
-            </div>
-        }
-        else
-        {
-            <table class="table mb-0">
-                <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Problem</th>
-                        <th>Updated</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var c in complaints)
-                    {
-                        <tr style="@(!c.IsRead ? "background:#fffbeb;" : "")">
-                            <td>
-                                <div class="fw-semibold">@c.Patient?.FullName</div>
-                                @if (!c.IsRead)
-                                {
-                                    <span style="font-size:.71rem;color:#854d0e;font-weight:700;">● New</span>
-                                }
-                            </td>
-                            <td>@(c.Description.Length > 70 ? c.Description[..70] + "…" : c.Description)</td>
-                            <td class="text-muted">@c.UpdatedAt.ToString("dd MMM, hh:mm tt")</td>
-                            <td>
-                                <span class="pill @(c.Status == "Active" ? "pill-a" : c.Status == "Reviewed" ? "pill-r" : "pill-d")">
-                                    @c.Status
-                                </span>
-                            </td>
-                            <td>
-                                <a href="/Doctor/ViewComplaint/@c.Id" class="btn btn-sm btn-outline-primary" style="font-size:.79rem;">Respond</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-    </div>
+<div class="mb-3">
+    @if ((int? )ViewBag.PendingApprovals > 0)
+    {
+        <a href="/Admin/PendingUsers" class="btn btn-sm btn-warning" style="font-size:.9rem;">Pending Approvals (@ViewBag.PendingApprovals)</a>
+    }
+    else
+    {
+        <a href="/Admin/PendingUsers" class="btn btn-sm btn-outline-secondary" style="font-size:.9rem;">Pending Approvals</a>
+    }
 </div>

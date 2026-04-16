@@ -16,6 +16,23 @@ namespace MediCore.Controllers
             return r == "Doctor" || r == "Admin" || r == "Receptionist";
         }
 
+        public IActionResult Dashboard()
+        {
+            var r = HttpContext.Session.GetString("UserRole");
+            if (r == null) return RedirectToAction("Login", "Account");
+            if (r != "Doctor" && r != "Admin") return RedirectToAction("Login", "Account");
+
+            ViewBag.NewComplaints = _db.Complaints.Count(c => !c.IsRead);
+            ViewBag.ActivePatients = _db.Patients.Count();
+            ViewBag.RecentComplaints = _db.Complaints
+                .Include(c => c.Patient)
+                .OrderByDescending(c => c.UpdatedAt)
+                .Take(6)
+                .ToList();
+
+            return View();
+        }
+
         public IActionResult Complaints(string? filter)
         {
             if (!IsStaff()) return RedirectToAction("Login", "Account");

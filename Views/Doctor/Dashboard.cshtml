@@ -1,0 +1,36 @@
+@{
+    Layout = "_Layout";
+}
+<h2>Doctor Dashboard</h2>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>New Complaints</h5>
+            <h2>@ViewBag.NewComplaints</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>Active Patients</h5>
+            <h2>@ViewBag.ActivePatients</h2>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Recent Complaints</h4>
+<table class="table">
+    <thead>
+        <tr><th>Patient</th><th>Title</th><th>Updated</th><th></th></tr>
+    </thead>
+    <tbody>
+@foreach(var c in (List<MediCore.Models.Complaint>)ViewBag.RecentComplaints ?? new List<MediCore.Models.Complaint>())
+{
+    <tr>
+        <td>@c.Patient?.FullName</td>
+        <td>@c.Description</td>
+        <td>@c.UpdatedAt.ToString("g")</td>
+        <td><a class="btn btn-sm btn-primary" href="/Doctor/ViewComplaint/@c.Id">View</a></td>
+    </tr>
+}
+    </tbody>
+</table>

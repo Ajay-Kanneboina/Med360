@@ -49,6 +49,10 @@
     {
         <div class="ok"><i class="bi bi-check-circle me-1"></i>@TempData["Success"]</div>
     }
+    @if (TempData["Info"] != null)
+    {
+        <div class="err"><i class="bi bi-info-circle me-1"></i>@TempData["Info"]</div>
+    }
     <form method="post">
         @Html.AntiForgeryToken()
         <div class="mb-3">

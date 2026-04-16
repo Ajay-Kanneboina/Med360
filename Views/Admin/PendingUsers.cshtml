@@ -1,0 +1,43 @@
+@model List<MediCore.Models.User>
+@{
+    Layout = "_Layout";
+}
+<h2>Pending Staff Approvals</h2>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Requested</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var u in Model)
+{
+        <tr>
+            <td>@u.FullName</td>
+            <td>@u.Email</td>
+            <td>@u.Role</td>
+            <td>@u.CreatedAt.ToString("g")</td>
+            <td>
+                <form asp-action="Approve" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <button class="btn btn-sm btn-success">Approve</button>
+                </form>
+                <form asp-action="Reject" method="post" style="display:inline;margin-left:6px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@u.Id" />
+                    <button class="btn btn-sm btn-danger">Reject</button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
