@@ -1,137 +1,160 @@
 @model MediCore.Models.Patient
 @{
+    Layout = "_Layout";
     ViewData["Title"] = Model.FullName;
-    var recentComplaints = Model.Complaints.OrderByDescending(c => c.UpdatedAt).Take(3).ToList();
+    var recentComplaints = Model.Complaints.OrderByDescending(c => c.UpdatedAt).Take(4).ToList();
+    int activeRec  = ViewBag.ActiveRecordCount  ?? 0;
+    int closedRec  = ViewBag.ClosedRecordCount  ?? 0;
+    int openComp   = ViewBag.OpenComplaintCount ?? 0;
 }
 
-<div class="d-flex justify-content-between align-items-start mb-3">
-    <div>
-        <div class="page-h">@Model.FullName</div>
-        <p class="page-s">Registered @Model.RegisteredOn.ToString("dd MMM yyyy")</p>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="/Doctor/AddRecord/@Model.Id" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i>Add Record
-        </a>
-        <a href="/Doctor/Patients" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i>Back
-        </a>
-    </div>
+<p class="page-s">Patient profile, medical history, records and complaints.</p>
+
+@* Action buttons *@
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <a href="/Doctor/AddRecord/@Model.Id" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Add Record
+    </a>
+    <a href="/Doctor/Patients" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Patients
+    </a>
+</div>
+
+@* KPI mini-tiles *@
+<div class="row g-2 mb-3">
+    <div class="col-4"><div class="stat"><div class="stat-n" style="color:#166534;">@activeRec</div><div class="stat-l">Active Records</div></div></div>
+    <div class="col-4"><div class="stat"><div class="stat-n" style="color:#475569;">@closedRec</div><div class="stat-l">Archived</div></div></div>
+    <div class="col-4"><div class="stat"><div class="stat-n" style="color:#b45309;">@openComp</div><div class="stat-l">Open Complaints</div></div></div>
 </div>
 
 <div class="row g-3 mb-3">
-    <div class="col-lg-5">
+    @* Demographics *@
+    <div class="col-lg-4">
         <div class="sbox">
-            <div class="slabel">Personal Information</div>
-            <div class="irow">
-                <span class="ilbl">Full Name</span>
-                <span>@Model.FullName</span>
+            <div class="slabel">Demographics</div>
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div style="width:50px;height:50px;border-radius:50%;background:#1e2d45;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.2rem;">
+                    @Model.FullName[0]
+                </div>
+                <div>
+                    <div class="fw-bold" style="color:#1e2d45;font-size:.97rem;">@Model.FullName</div>
+                    <div class="stat-l">Patient #@Model.Id</div>
+                </div>
             </div>
-            <div class="irow">
-                <span class="ilbl">Date of Birth</span>
-                <span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+            <div class="irow"><span class="ilbl">Date of Birth</span><span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span></div>
+            <div class="irow"><span class="ilbl">Gender</span><span>@(Model.Gender ?? "—")</span></div>
+            <div class="irow"><span class="ilbl">Blood Group</span>
+                <span>@(Model.BloodGroup != null ? Model.BloodGroup : "—")</span>
             </div>
-            <div class="irow">
-                <span class="ilbl">Gender</span>
-                <span>@(Model.Gender ?? "—")</span>
-            </div>
-            <div class="irow">
-                <span class="ilbl">Blood Group</span>
-                <span>@(Model.BloodGroup ?? "—")</span>
-            </div>
-            <div class="irow">
-                <span class="ilbl">Phone</span>
-                <span>@(Model.Phone ?? "—")</span>
-            </div>
-            <div class="irow">
-                <span class="ilbl">Email</span>
-                <span>@(Model.Email ?? "—")</span>
-            </div>
-            <div class="irow">
-                <span class="ilbl">Address</span>
-                <span>@(Model.Address ?? "—")</span>
-            </div>
-            <div class="irow">
-                <span class="ilbl">Emergency</span>
-                <span>@(Model.EmergencyContact ?? "—")</span>
-            </div>
+            <div class="irow"><span class="ilbl">Phone</span><span>@(Model.Phone ?? "—")</span></div>
+            <div class="irow"><span class="ilbl">Email</span><span style="font-size:.82rem;">@(Model.Email ?? "—")</span></div>
+            <div class="irow"><span class="ilbl">Address</span><span>@(Model.Address ?? "—")</span></div>
+            <div class="irow"><span class="ilbl">Emergency</span><span style="font-size:.82rem;">@(Model.EmergencyContact ?? "—")</span></div>
+            <div class="irow"><span class="ilbl">Registered</span><span>@Model.RegisteredOn.ToString("dd MMM yyyy")</span></div>
         </div>
-    </div>
 
-    <div class="col-lg-7">
-        <div class="sbox mb-3">
+        <div class="sbox">
             <div class="slabel">Medical History</div>
             @if (string.IsNullOrWhiteSpace(Model.MedicalHistory))
             {
-                <p class="text-muted mb-0" style="font-size:.86rem;">No prior medical history on record.</p>
+                <p style="font-size:.85rem;color:#8faac4;margin:0;">No prior history recorded.</p>
             }
             else
             {
                 <p style="font-size:.87rem;line-height:1.75;white-space:pre-line;margin:0;">@Model.MedicalHistory</p>
             }
         </div>
+    </div>
 
-        @if (recentComplaints.Any())
-        {
-            <div class="sbox">
-                <div class="slabel">Recent Complaints (@Model.Complaints.Count total)</div>
-                @foreach (var c in recentComplaints)
-                {
-                    <div class="mb-2 pb-2" style="border-bottom:1px solid #f0f3f8;font-size:.85rem;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>@(c.Description.Length > 60 ? c.Description[..60] + "…" : c.Description)</span>
-                            <span class="pill @(c.Status == "Active" ? "pill-a" : c.Status == "Reviewed" ? "pill-r" : "pill-d") ms-2">
-                                @c.Status
-                            </span>
-                        </div>
-                        <div class="text-muted" style="font-size:.77rem;">@c.UpdatedAt.ToString("dd MMM yyyy")</div>
-                    </div>
-                }
-                <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary mt-1" style="font-size:.79rem;">
-                    All Complaints
+    @* Records + Complaints *@
+    <div class="col-lg-8">
+        @* Medical Records *@
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-medical me-2 text-primary"></i>Medical Records
+                    <span class="badge bg-primary ms-1">@Model.Records.Count</span>
+                </span>
+                <a href="/Doctor/AddRecord/@Model.Id" class="btn btn-sm btn-outline-primary" style="font-size:.78rem;">
+                    <i class="bi bi-plus-lg me-1"></i>Add
                 </a>
             </div>
-        }
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header px-3 py-2 d-flex justify-content-between align-items-center">
-        <span>Medical Records <span class="badge bg-primary ms-1">@Model.Records.Count</span></span>
-        <a href="/Doctor/AddRecord/@Model.Id" class="btn btn-sm btn-outline-primary" style="font-size:.8rem;">
-            Add Record
-        </a>
-    </div>
-    <div class="card-body p-0">
-        @if (!Model.Records.Any())
-        {
-            <div class="text-center py-4 text-muted">
-                <i class="bi bi-file-medical" style="font-size:2rem;opacity:.3;"></i>
-                <p class="mt-2 small mb-0">No records added yet.</p>
+            <div class="card-body p-0">
+                @if (!Model.Records.Any())
+                {
+                    <div class="text-center py-4 stat-l">No records yet — click Add to create the first one.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Date</th><th>Diagnosis</th><th>Treatment</th><th>Doctor</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var r in Model.Records.OrderByDescending(r => r.VisitDate))
+                        {
+                            <tr>
+                                <td style="color:#8faac4;white-space:nowrap;">@r.VisitDate.ToString("dd MMM yyyy")</td>
+                                <td class="fw-semibold">@r.Diagnosis</td>
+                                <td style="color:#8faac4;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                    @(r.Treatment.Length > 50 ? r.Treatment[..50] + "…" : r.Treatment)
+                                </td>
+                                <td style="color:#8faac4;">@(r.DoctorName ?? "—")</td>
+                                <td>
+                                    @if (r.Status == "Active") { <span class="pill pill-d">Active</span> }
+                                    else { <span class="pill pill-x">Closed</span> }
+                                </td>
+                                <td>
+                                    <a href="/Doctor/EditRecord/@r.Id" class="btn btn-sm btn-outline-secondary me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+                                    @if (r.Status == "Active")
+                                    {
+                                        <form asp-controller="Doctor" asp-action="CloseRecord" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@r.Id" />
+                                            <button class="btn btn-sm btn-outline-warning" title="Archive" onclick="return confirm('Archive this record?')"><i class="bi bi-archive"></i></button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
             </div>
-        }
-        else
-        {
-            <table class="table mb-0">
-                <thead>
-                    <tr><th>Date</th><th>Diagnosis</th><th>Treatment</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    @foreach (var r in Model.Records.OrderByDescending(x => x.VisitDate))
-                    {
-                        <tr>
-                            <td class="text-muted">@r.VisitDate.ToString("dd MMM yyyy")</td>
-                            <td class="fw-semibold">@r.Diagnosis</td>
-                            <td class="text-muted">
-                                @(r.Treatment.Length > 60 ? r.Treatment[..60] + "…" : r.Treatment)
-                            </td>
-                            <td>
-                                <span class="pill @(r.Status == "Active" ? "pill-r" : "pill-x")">@r.Status</span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+        </div>
+
+        @* Complaints *@
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-square-text me-2 text-warning"></i>Complaints
+                    <span class="badge bg-warning text-dark ms-1">@Model.Complaints.Count</span>
+                </span>
+                <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary" style="font-size:.78rem;">All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentComplaints.Any())
+                {
+                    <div class="text-center py-4 stat-l">No complaints from this patient.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Date</th><th>Problem</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var c in recentComplaints)
+                        {
+                            <tr>
+                                <td style="color:#8faac4;white-space:nowrap;">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
+                                <td>@(c.Description.Length > 65 ? c.Description[..65] + "…" : c.Description)</td>
+                                <td>
+                                    @if (!c.IsRead)               { <span class="pill" style="background:#fee2e2;color:#991b1b;">Unread</span> }
+                                    else if (c.Status=="Reviewed"){ <span class="pill pill-d">Reviewed</span> }
+                                    else                          { <span class="pill pill-a">Active</span> }
+                                </td>
+                                <td><a href="/Doctor/ViewComplaint/@c.Id" class="btn btn-sm btn-outline-primary">View</a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
     </div>
 </div>

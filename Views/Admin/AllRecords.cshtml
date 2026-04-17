@@ -1,0 +1,68 @@
+@model List<MediCore.Models.Record>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Medical Records";
+    string statusFilter = ViewBag.StatusFilter ?? "";
+    string searchFilter = ViewBag.SearchFilter ?? "";
+}
+
+<p class="page-s">System-wide medical records across all patients and doctors.</p>
+
+<div class="sbox mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label">Search</label>
+            <input name="search" class="form-control" placeholder="Diagnosis, treatment or patient name…" value="@searchFilter" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="Active" selected="@(statusFilter=="Active" ? "selected" : null)">Active</option>
+                <option value="Closed" selected="@(statusFilter=="Closed" ? "selected" : null)">Closed</option>
+            </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-primary w-100">Filter</button></div>
+        <div class="col-md-2"><a href="/Admin/AllRecords" class="btn btn-outline-secondary w-100">Clear</a></div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-file-medical me-2 text-primary"></i>Medical Records</span>
+        <span class="stat-l">@Model.Count record(s)</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead>
+                <tr><th>#</th><th>Patient</th><th>Visit Date</th><th>Diagnosis</th><th>Treatment</th><th>Doctor</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-center py-4" style="color:#8faac4;">No records found.</td></tr>
+            }
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td style="color:#8faac4;">@r.Id</td>
+                    <td>
+                        <a href="/Admin/PatientDetail/@r.PatientId" class="fw-semibold text-decoration-none">
+                            @(r.Patient?.FullName ?? $"Patient #{r.PatientId}")
+                        </a>
+                    </td>
+                    <td style="color:#8faac4;">@r.VisitDate.ToString("dd MMM yyyy")</td>
+                    <td class="fw-semibold">@r.Diagnosis</td>
+                    <td>@(r.Treatment.Length > 60 ? r.Treatment[..60] + "…" : r.Treatment)</td>
+                    <td style="color:#8faac4;">@(r.DoctorName ?? "—")</td>
+                    <td>
+                        @if (r.Status == "Active")    { <span class="pill pill-d">Active</span> }
+                        else if (r.Status == "Closed") { <span class="pill pill-x">Closed</span> }
+                        else                           { <span class="pill pill-r">@r.Status</span> }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

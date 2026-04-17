@@ -1,36 +1,160 @@
 @{
     Layout = "_Layout";
+    ViewData["Title"] = "Doctor Dashboard";
+    var recentComplaints = ViewBag.RecentComplaints as List<MediCore.Models.Complaint> ?? new();
+    var recentRecords    = ViewBag.RecentRecords    as List<MediCore.Models.Record>    ?? new();
+    var priorityPats     = ViewBag.PriorityPatients as List<MediCore.Models.Patient>   ?? new();
+    var doctorName       = Context.Session.GetString("UserName") ?? "Doctor";
 }
-<h2>Doctor Dashboard</h2>
-<div class="row">
-    <div class="col-md-4">
-        <div class="card p-3">
-            <h5>New Complaints</h5>
-            <h2>@ViewBag.NewComplaints</h2>
+
+<p class="page-s">Welcome back, Dr. @doctorName — here's your clinical overview.</p>
+
+@* KPI Cards *@
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n text-primary">@ViewBag.TotalPatients</div>
+            <div class="stat-l"><i class="bi bi-people me-1"></i>Total Patients</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card p-3">
-            <h5>Active Patients</h5>
-            <h2>@ViewBag.ActivePatients</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#0f766e;">@ViewBag.TotalRecords</div>
+            <div class="stat-l"><i class="bi bi-file-medical me-1"></i>Total Records</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#166534;">@ViewBag.ActiveRecords</div>
+            <div class="stat-l"><i class="bi bi-clipboard2-pulse me-1"></i>Active Records</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n text-danger">@ViewBag.UnreadComplaints</div>
+            <div class="stat-l"><i class="bi bi-chat-square-text me-1"></i>Unread Complaints</div>
         </div>
     </div>
 </div>
 
-<h4 class="mt-4">Recent Complaints</h4>
-<table class="table">
-    <thead>
-        <tr><th>Patient</th><th>Title</th><th>Updated</th><th></th></tr>
-    </thead>
-    <tbody>
-@foreach(var c in (List<MediCore.Models.Complaint>)ViewBag.RecentComplaints ?? new List<MediCore.Models.Complaint>())
-{
-    <tr>
-        <td>@c.Patient?.FullName</td>
-        <td>@c.Description</td>
-        <td>@c.UpdatedAt.ToString("g")</td>
-        <td><a class="btn btn-sm btn-primary" href="/Doctor/ViewComplaint/@c.Id">View</a></td>
-    </tr>
-}
-    </tbody>
-</table>
+@* Quick actions *@
+<div class="sbox mb-4">
+    <div class="slabel">Quick Actions</div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="/Doctor/Patients"                class="btn btn-sm btn-primary"><i class="bi bi-people me-1"></i>All Patients</a>
+        <a href="/Doctor/Complaints"              class="btn btn-sm btn-outline-danger"><i class="bi bi-chat-square-text me-1"></i>All Complaints</a>
+        <a href="/Doctor/Complaints?filter=unread" class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-exclamation me-1"></i>Unread</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    @* Recent Complaints *@
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-square-text me-2 text-warning"></i>Recent Patient Complaints</span>
+                <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentComplaints.Any())
+                {
+                    <div class="text-center py-5 stat-l">No complaints yet.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Patient</th><th>Problem</th><th>Date</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var c in recentComplaints)
+                        {
+                            <tr class="@(!c.IsRead ? "unread-row" : "")">
+                                <td>
+                                    <div class="fw-semibold">@(c.Patient?.FullName ?? "—")</div>
+                                    @if (!c.IsRead)
+                                    {
+                                        <span class="new-badge">● NEW</span>
+                                    }
+                                </td>
+                                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@c.Description</td>
+                                <td style="color:#8faac4;white-space:nowrap;">@c.UpdatedAt.ToString("dd MMM")</td>
+                                <td>
+                                    @if (!c.IsRead)                  { <span class="pill pill-a">Unread</span> }
+                                    else if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
+                                    else                             { <span class="pill pill-a">Active</span> }
+                                </td>
+                                <td><a href="/Doctor/ViewComplaint/@c.Id" class="btn btn-sm btn-outline-primary">View</a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* Priority Patients *@
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Needs Attention</span>
+                <a href="/Doctor/Patients" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">All Patients</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!priorityPats.Any())
+                {
+                    <div class="text-center py-5 stat-l"><i class="bi bi-check-circle-fill text-success" style="font-size:1.6rem;"></i><div class="mt-2">All caught up!</div></div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead><tr><th>Patient</th><th>Open</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var p in priorityPats)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@p.FullName</td>
+                                <td><span class="pill pill-a">@p.Complaints.Count(c => c.Status == "Active") complaint(s)</span></td>
+                                <td><a href="/Doctor/PatientDetail/@p.Id" class="btn btn-sm btn-outline-primary">View</a></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Recent Records Added *@
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-file-medical me-2 text-primary"></i>Recently Added Medical Records</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!recentRecords.Any())
+        {
+            <div class="text-center py-4 stat-l">No records added yet.</div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead><tr><th>Patient</th><th>Diagnosis</th><th>Treatment</th><th>Visit Date</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach (var r in recentRecords)
+                {
+                    <tr>
+                        <td><a href="/Doctor/PatientDetail/@r.PatientId" class="fw-semibold text-decoration-none">@(r.Patient?.FullName ?? $"Patient #{r.PatientId}")</a></td>
+                        <td class="fw-semibold">@r.Diagnosis</td>
+                        <td style="color:#8faac4;">@(r.Treatment.Length > 55 ? r.Treatment[..55] + "…" : r.Treatment)</td>
+                        <td style="color:#8faac4;">@r.VisitDate.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (r.Status == "Active") { <span class="pill pill-d">Active</span> }
+                            else { <span class="pill pill-x">Closed</span> }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

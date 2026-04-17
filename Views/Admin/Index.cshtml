@@ -1,0 +1,135 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<p class="page-s">System-wide overview — MediCore360</p>
+
+@* KPI stat row *@
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n text-primary">@ViewBag.TotalPatients</div>
+            <div class="stat-l"><i class="bi bi-person-vcard me-1"></i>Total Patients</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#0f766e;">@ViewBag.TotalRecords</div>
+            <div class="stat-l"><i class="bi bi-file-medical me-1"></i>Medical Records</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#b45309;">@ViewBag.TotalComplaints</div>
+            <div class="stat-l"><i class="bi bi-chat-square-text me-1"></i>Total Complaints</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n text-danger">@ViewBag.PendingApprovals</div>
+            <div class="stat-l"><i class="bi bi-person-check me-1"></i>Pending Approvals</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#1e2d45;">@ViewBag.DoctorCount</div>
+            <div class="stat-l"><i class="bi bi-person-badge me-1"></i>Active Doctors</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#6d28d9;">@ViewBag.NurseCount</div>
+            <div class="stat-l"><i class="bi bi-heart-pulse me-1"></i>Active Nurses</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#0369a1;">@ViewBag.ReceptionistCount</div>
+            <div class="stat-l"><i class="bi bi-headset me-1"></i>Receptionists</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#166534;">@ViewBag.ResolvedComplaints</div>
+            <div class="stat-l"><i class="bi bi-check2-circle me-1"></i>Resolved Complaints</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    @* Recent Patients *@
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person-vcard me-2 text-primary"></i>Recently Registered Patients</span>
+                <a href="/Admin/AllPatients" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Name</th><th>Gender</th><th>Blood</th><th>Registered</th></tr></thead>
+                    <tbody>
+                    @foreach (var p in (List<MediCore.Models.Patient>)(ViewBag.RecentPatients ?? new List<MediCore.Models.Patient>()))
+                    {
+                        <tr>
+                            <td><a href="/Admin/PatientDetail/@p.Id" class="text-decoration-none fw-semibold">@p.FullName</a></td>
+                            <td>@(p.Gender ?? "—")</td>
+                            <td>@(p.BloodGroup != null ? $"<span class='pill pill-r'>{p.BloodGroup}</span>" : "—")</td>
+                            <td style="color:#8faac4;">@p.RegisteredOn.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* Recent Complaints *@
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-square-text me-2 text-warning"></i>Recent Complaints</span>
+                <a href="/Admin/AllComplaints" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Patient</th><th>Description</th><th>Status</th></tr></thead>
+                    <tbody>
+                    @foreach (var c in (List<MediCore.Models.Complaint>)(ViewBag.RecentComplaints ?? new List<MediCore.Models.Complaint>()))
+                    {
+                        <tr>
+                            <td class="fw-semibold">@(c.Patient?.FullName ?? "—")</td>
+                            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@c.Description</td>
+                            <td>
+                                @if (c.Status == "Reviewed")      { <span class="pill pill-d">Reviewed</span> }
+                                else if (c.Status == "Active")    { <span class="pill pill-a">Active</span> }
+                                else                               { <span class="pill pill-x">@c.Status</span> }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Quick-action shortcuts *@
+<div class="row g-3 mt-1">
+    <div class="col-12">
+        <div class="sbox">
+            <div class="slabel">Quick Actions</div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/Admin/PendingUsers" class="btn btn-sm btn-primary"><i class="bi bi-person-check me-1"></i>Approve Staff</a>
+                <a href="/Admin/AllPatients"  class="btn btn-sm btn-outline-primary"><i class="bi bi-people me-1"></i>All Patients</a>
+                <a href="/Admin/AllRecords"   class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-medical me-1"></i>Medical Records</a>
+                <a href="/Admin/AllComplaints" class="btn btn-sm btn-outline-warning"><i class="bi bi-chat-square-text me-1"></i>Complaints</a>
+                <a href="/Admin/AuditLog"     class="btn btn-sm btn-outline-dark"><i class="bi bi-shield-check me-1"></i>Audit Log</a>
+                <a href="/Admin/Analytics"    class="btn btn-sm btn-outline-success"><i class="bi bi-bar-chart-line me-1"></i>Analytics</a>
+            </div>
+        </div>
+    </div>
+</div>

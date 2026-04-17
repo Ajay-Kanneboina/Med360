@@ -1,0 +1,73 @@
+@model List<MediCore.Models.Complaint>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "All Complaints";
+    string statusFilter = ViewBag.StatusFilter ?? "";
+    string searchFilter = ViewBag.SearchFilter ?? "";
+    int unreadCount     = ViewBag.UnreadCount ?? 0;
+}
+
+<p class="page-s">Monitor and review all patient complaints across the platform.</p>
+
+<div class="sbox mb-3">
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+        <a href="/Admin/AllComplaints" class="btn btn-sm @(statusFilter=="" ? "btn-primary" : "btn-outline-secondary")">All</a>
+        <a href="/Admin/AllComplaints?status=unread" class="btn btn-sm @(statusFilter=="unread" ? "btn-primary" : "btn-outline-secondary")">
+            Unread @if (unreadCount > 0) { <span class="badge bg-danger ms-1">@unreadCount</span> }
+        </a>
+        <a href="/Admin/AllComplaints?status=Active"   class="btn btn-sm @(statusFilter=="Active"   ? "btn-primary" : "btn-outline-secondary")">Active</a>
+        <a href="/Admin/AllComplaints?status=Reviewed" class="btn btn-sm @(statusFilter=="Reviewed" ? "btn-primary" : "btn-outline-secondary")">Reviewed</a>
+        <a href="/Admin/AllComplaints?status=Closed"   class="btn btn-sm @(statusFilter=="Closed"   ? "btn-primary" : "btn-outline-secondary")">Closed</a>
+    </div>
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-7">
+            <input name="search" class="form-control" placeholder="Search by patient or description…" value="@searchFilter" />
+        </div>
+        <input type="hidden" name="status" value="@statusFilter" />
+        <div class="col-md-2"><button class="btn btn-primary w-100">Search</button></div>
+        <div class="col-md-2"><a href="/Admin/AllComplaints" class="btn btn-outline-secondary w-100">Clear</a></div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-chat-square-text me-2 text-warning"></i>Complaints</span>
+        <span class="stat-l">@Model.Count result(s)</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead>
+                <tr><th>#</th><th>Patient</th><th>Description</th><th>Submitted</th><th>Status</th><th>Read</th><th>Responded By</th></tr>
+            </thead>
+            <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7" class="text-center py-4" style="color:#8faac4;">No complaints found.</td></tr>
+            }
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td style="color:#8faac4;">@c.Id</td>
+                    <td>
+                        <a href="/Admin/PatientDetail/@c.PatientId" class="fw-semibold text-decoration-none">
+                            @(c.Patient?.FullName ?? $"Patient #{c.PatientId}")
+                        </a>
+                    </td>
+                    <td>@(c.Description.Length > 70 ? c.Description[..70] + "…" : c.Description)</td>
+                    <td style="color:#8faac4;">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
+                    <td>
+                        @if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
+                        else if (c.Status == "Active") { <span class="pill pill-a">Active</span> }
+                        else { <span class="pill pill-x">@c.Status</span> }
+                    </td>
+                    <td>
+                        @if (c.IsRead) { <span class="pill pill-d">Read</span> }
+                        else           { <span class="pill" style="background:#fee2e2;color:#991b1b;">Unread</span> }
+                    </td>
+                    <td style="color:#8faac4;">@(c.RespondedBy ?? "—")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

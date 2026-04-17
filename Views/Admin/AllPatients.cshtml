@@ -1,0 +1,79 @@
+@model List<MediCore.Models.Patient>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "All Patients";
+    string searchFilter = ViewBag.SearchFilter ?? "";
+    string genderFilter = ViewBag.GenderFilter ?? "";
+}
+
+<p class="page-s">Full patient registry — view, search, and manage patient records.</p>
+
+<div class="sbox mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label">Search</label>
+            <input name="search" class="form-control" placeholder="Name, email or phone…" value="@searchFilter" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Gender</label>
+            <select name="gender" class="form-select">
+                <option value="">All</option>
+                <option value="Male"   selected="@(genderFilter=="Male"   ? "selected" : null)">Male</option>
+                <option value="Female" selected="@(genderFilter=="Female" ? "selected" : null)">Female</option>
+                <option value="Other"  selected="@(genderFilter=="Other"  ? "selected" : null)">Other</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filter</button>
+        </div>
+        <div class="col-md-2">
+            <a href="/Admin/AllPatients" class="btn btn-outline-secondary w-100">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-person-vcard me-2 text-primary"></i>Patient Registry</span>
+        <span class="stat-l">@Model.Count patient(s)</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead>
+                <tr><th>#</th><th>Name</th><th>DOB</th><th>Gender</th><th>Blood</th><th>Phone</th><th>Records</th><th>Complaints</th><th>Registered</th><th></th></tr>
+            </thead>
+            <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="10" class="text-center py-4" style="color:#8faac4;">No patients found.</td></tr>
+            }
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td style="color:#8faac4;">@p.Id</td>
+                    <td><a href="/Admin/PatientDetail/@p.Id" class="fw-semibold text-decoration-none">@p.FullName</a></td>
+                    <td style="color:#8faac4;">@p.DateOfBirth.ToString("dd MMM yyyy")</td>
+                    <td>@(p.Gender ?? "—")</td>
+                    <td>@if(p.BloodGroup!=null){<span class="pill pill-r">@p.BloodGroup</span>}else{<text>—</text>}</td>
+                    <td style="color:#8faac4;">@(p.Phone ?? "—")</td>
+                    <td>@p.Records.Count</td>
+                    <td>
+                        @{ var open = p.Complaints.Count(c => c.Status == "Active"); }
+                        @if (open > 0) { <span class="pill pill-a">@open open</span> }
+                        else           { <span class="pill pill-x">@p.Complaints.Count</span> }
+                    </td>
+                    <td style="color:#8faac4;">@p.RegisteredOn.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <a href="/Admin/PatientDetail/@p.Id" class="btn btn-sm btn-outline-primary me-1" title="View"><i class="bi bi-eye"></i></a>
+                        <form asp-action="DeletePatient" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete patient and ALL their records?')" title="Delete"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

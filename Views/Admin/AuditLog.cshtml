@@ -1,0 +1,54 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Audit Log";
+    var entries = ViewBag.Entries as List<MediCore.Models.AuditEntry> ?? new List<MediCore.Models.AuditEntry>();
+}
+
+<p class="page-s">Immutable activity trail — all significant actions in the system.</p>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-shield-check me-2 text-success"></i>System Audit Trail</span>
+        <span class="stat-l">@entries.Count events</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!entries.Any())
+        {
+            <div class="text-center py-5 stat-l">No audit entries yet.</div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>Timestamp</th><th>Category</th><th>Actor</th><th>Action</th><th>Target</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var e in entries)
+                {
+                    <tr>
+                        <td style="color:#8faac4;white-space:nowrap;">@e.Timestamp.ToString("dd MMM yyyy HH:mm")</td>
+                        <td>
+                            @if (e.Category == "User")          { <span class="pill" style="background:#ede9fe;color:#5b21b6;">User</span> }
+                            else if (e.Category == "Record")    { <span class="pill pill-r">Record</span> }
+                            else if (e.Category == "Complaint") { <span class="pill pill-a">Complaint</span> }
+                            else                                { <span class="pill pill-x">@e.Category</span> }
+                        </td>
+                        <td class="fw-semibold">@e.Actor</td>
+                        <td>@e.Action</td>
+                        <td style="color:#8faac4;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@e.Target">@e.Target</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="sbox mt-3" style="background:#fefce8;border:1px solid #fde68a;">
+    <div style="font-size:.82rem;color:#92400e;">
+        <i class="bi bi-info-circle me-1"></i>
+        <strong>HIPAA / GDPR Note:</strong> This audit log records all user account events, medical record additions,
+        and complaint lifecycle changes. Logs are read-only and cannot be modified by any user, including administrators,
+        in accordance with compliance requirements.
+    </div>
+</div>

@@ -4,64 +4,200 @@
     Layout = "_PatientLayout";
 }
 
-<div class="mb-3">
-    <h5 class="fw-bold mb-1" style="color:#1e2d45;">My Profile</h5>
-    <p class="text-muted mb-0" style="font-size:.83rem;">Your registered health information</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="page-s mb-0">Your registered personal and clinical information.</p>
+    <div>
+        <button id="btn-edit"   class="btn-g"><i class="bi bi-pencil me-1"></i>Edit Profile</button>
+        <button id="btn-cancel" class="btn btn-outline-secondary" style="display:none;">Cancel</button>
+    </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header px-3 py-2">Personal Details</div>
-            <div class="card-body p-3">
-                <div class="irow">
-                    <span class="ilbl">Full Name</span>
-                    <span>@Model.FullName</span>
+<form method="post" action="/Patient/EditProfile" id="profile-form">
+    @Html.AntiForgeryToken()
+
+    <div class="row g-3">
+        @* ── Identity card (always read-only) ────────────────── *@
+        <div class="col-lg-4">
+            <div class="card text-center p-4 mb-3">
+                <div style="width:70px;height:70px;border-radius:50%;background:#1e2d45;
+                            display:flex;align-items:center;justify-content:center;
+                            color:#fff;font-size:1.8rem;font-weight:700;margin:0 auto 12px;">
+                    @(Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpper() : "P")
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Date of Birth</span>
-                    <span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+                <div class="fw-bold" style="color:#1e2d45;">@Model.FullName</div>
+                <div class="text-muted" style="font-size:.82rem;">Patient #@Model.Id</div>
+                @if (!string.IsNullOrEmpty(Model.BloodGroup))
+                {
+                    <div class="mt-2"><span class="pill pill-r" id="chip-blood">@Model.BloodGroup</span></div>
+                }
+                <div class="mt-3 pt-3" style="border-top:1px solid #f0f3f8;font-size:.79rem;color:#8faac4;">
+                    <i class="bi bi-calendar me-1"></i>Registered @Model.RegisteredOn.ToString("dd MMM yyyy")
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Gender</span>
-                    <span>@(Model.Gender ?? "—")</span>
+            </div>
+
+            @* ── Personal / Clinical Info ─────────────────────── *@
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-clipboard2-pulse me-2" style="color:#1e2d45;"></i>Personal Info
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Blood Group</span>
-                    <span>@(Model.BloodGroup ?? "—")</span>
+
+                @* view mode *@
+                <div class="card-body p-3 js-view">
+                    <div class="irow"><span class="ilbl">Date of Birth</span><span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span></div>
+                    <div class="irow"><span class="ilbl">Gender</span><span>@(Model.Gender ?? "—")</span></div>
+                    <div class="irow"><span class="ilbl">Blood Group</span><span>@(Model.BloodGroup ?? "—")</span></div>
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Phone</span>
-                    <span>@(Model.Phone ?? "—")</span>
+
+                @* edit mode *@
+                <div class="card-body p-3 js-edit" style="display:none;">
+                    <div class="mb-2">
+                        <label class="form-label">Date of Birth</label>
+                        <input type="date" name="dateOfBirth" class="form-control"
+                               value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Gender</label>
+                        <select name="gender" class="form-select">
+                            <option value=""       selected="@(string.IsNullOrEmpty(Model.Gender) ? "selected" : null)">—</option>
+                            <option value="Male"   selected="@(Model.Gender == "Male"   ? "selected" : null)">Male</option>
+                            <option value="Female" selected="@(Model.Gender == "Female" ? "selected" : null)">Female</option>
+                            <option value="Other"  selected="@(Model.Gender == "Other"  ? "selected" : null)">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">Blood Group</label>
+                        <select name="bloodGroup" class="form-select">
+                            <option value="" selected="@(string.IsNullOrEmpty(Model.BloodGroup) ? "selected" : null)">—</option>
+                            @foreach (var bg in new[] { "A+","A-","B+","B-","AB+","AB-","O+","O-" })
+                            {
+                                <option value="@bg" selected="@(Model.BloodGroup == bg ? "selected" : null)">@bg</option>
+                            }
+                        </select>
+                    </div>
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Email</span>
-                    <span>@(Model.Email ?? "—")</span>
+            </div>
+        </div>
+
+        @* ── Right column: Contact + Medical History ──────────── *@
+        <div class="col-lg-8">
+            @* Contact Info *@
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-person-lines-fill me-2 text-primary"></i>Contact Information
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Address</span>
-                    <span>@(Model.Address ?? "—")</span>
+
+                @* view mode *@
+                <div class="card-body p-3 js-view">
+                    <div class="irow"><span class="ilbl"><i class="bi bi-telephone me-1"></i>Phone</span><span>@(Model.Phone ?? "—")</span></div>
+                    <div class="irow"><span class="ilbl"><i class="bi bi-envelope me-1"></i>Email</span><span>@(Model.Email ?? "—")</span></div>
+                    <div class="irow"><span class="ilbl"><i class="bi bi-geo-alt me-1"></i>Address</span><span>@(Model.Address ?? "—")</span></div>
+                    <div class="irow"><span class="ilbl"><i class="bi bi-person-heart me-1"></i>Emergency</span><span>@(Model.EmergencyContact ?? "—")</span></div>
                 </div>
-                <div class="irow">
-                    <span class="ilbl">Emergency Contact</span>
-                    <span>@(Model.EmergencyContact ?? "—")</span>
+
+                @* edit mode *@
+                <div class="card-body p-3 js-edit" style="display:none;">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-telephone me-1"></i>Phone Number
+                            </label>
+                            <input type="tel" name="phone" class="form-control"
+                                   value="@Model.Phone" placeholder="e.g. 9876543210" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="bi bi-envelope me-1"></i>Email Address
+                            </label>
+                            <input type="email" name="email" class="form-control"
+                                   value="@Model.Email" placeholder="e.g. john@email.com" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">
+                                <i class="bi bi-geo-alt me-1"></i>Home Address
+                            </label>
+                            <textarea name="address" class="form-control" rows="2"
+                                      placeholder="Street, City, State…">@Model.Address</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">
+                                <i class="bi bi-person-heart me-1"></i>Emergency Contact
+                            </label>
+                            <input type="text" name="emergencyContact" class="form-control"
+                                   value="@Model.EmergencyContact"
+                                   placeholder="e.g. Jane Doe — 9876543211" />
+                            <div class="mt-1" style="font-size:.77rem;color:#8faac4;">
+                                Include the name and phone number of your emergency contact person.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Medical History *@
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-journal-medical me-2" style="color:#1e2d45;"></i>Medical History
+                </div>
+
+                @* view mode *@
+                <div class="card-body p-3 js-view">
+                    @if (string.IsNullOrWhiteSpace(Model.MedicalHistory))
+                    {
+                        <div class="text-center py-3">
+                            <i class="bi bi-journal" style="font-size:1.8rem;opacity:.25;"></i>
+                            <p class="text-muted mt-2 mb-0" style="font-size:.85rem;">No medical history on record yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <p style="font-size:.87rem;line-height:1.8;white-space:pre-line;margin:0;">@Model.MedicalHistory</p>
+                    }
+                </div>
+
+                @* edit mode *@
+                <div class="card-body p-3 js-edit" style="display:none;">
+                    <textarea name="medicalHistory" class="form-control" rows="5"
+                              placeholder="Past conditions, surgeries, allergies, family history, regular medications…">@Model.MedicalHistory</textarea>
+                    <div class="mt-2" style="font-size:.77rem;color:#8faac4;">
+                        Information you enter here is self-reported. Your doctor will verify it at your next visit.
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header px-3 py-2">Medical History</div>
-            <div class="card-body p-3">
-                @if (string.IsNullOrWhiteSpace(Model.MedicalHistory))
-                {
-                    <p class="text-muted mb-0" style="font-size:.86rem;">No prior medical history on record.</p>
-                }
-                else
-                {
-                    <p style="font-size:.87rem;line-height:1.75;white-space:pre-line;margin:0;">@Model.MedicalHistory</p>
-                }
-            </div>
-        </div>
+
+    @* Save bar — only visible in edit mode *@
+    <div class="sbox mt-3 d-flex gap-2 js-edit" style="display:none !important;">
+        <button type="submit" class="btn-g px-4">
+            <i class="bi bi-check-lg me-1"></i>Save Changes
+        </button>
+        <button type="button" id="btn-cancel-2" class="btn btn-outline-secondary px-4">Discard</button>
     </div>
-</div>
+</form>
+
+<script>
+    (function () {
+        const btnEdit   = document.getElementById('btn-edit');
+        const btnCancel = document.getElementById('btn-cancel');
+        const btnCancel2 = document.getElementById('btn-cancel-2');
+        const viewEls  = document.querySelectorAll('.js-view');
+        const editEls  = document.querySelectorAll('.js-edit');
+
+        function setMode(editing) {
+            viewEls.forEach(el => el.style.display = editing ? 'none' : '');
+            editEls.forEach(el => {
+                el.style.display = editing ? '' : 'none';
+                if (editing && el.classList.contains('sbox')) {
+                    // the save bar uses !important via style attr; re-apply inline
+                    el.style.setProperty('display', 'flex', 'important');
+                }
+            });
+            btnEdit.style.display   = editing ? 'none' : '';
+            btnCancel.style.display = editing ? ''     : 'none';
+        }
+
+        btnEdit.addEventListener('click',    () => setMode(true));
+        btnCancel.addEventListener('click',  () => { setMode(false); /* discard — reload page to reset unsaved inputs */ location.reload(); });
+        btnCancel2.addEventListener('click', () => { setMode(false); location.reload(); });
+    })();
+</script>

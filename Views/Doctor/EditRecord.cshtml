@@ -1,6 +1,7 @@
+@model MediCore.Models.Record
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Add Medical Record";
+    ViewData["Title"] = "Edit Record";
 }
 
 <p class="page-s">Patient: <strong>@ViewBag.PatientName</strong></p>
@@ -10,20 +11,19 @@
     <div class="alert alert-danger mb-3"><i class="bi bi-exclamation-circle me-2"></i>@ViewBag.Error</div>
 }
 
-<form method="post" action="/Doctor/AddRecord" style="max-width:720px;">
+<form method="post" action="/Doctor/EditRecord/@Model.Id" style="max-width:720px;">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="patientId" value="@ViewBag.PatientId" />
 
     <div class="sbox mb-3">
         <div class="slabel">Diagnosis & Visit</div>
         <div class="row g-3">
             <div class="col-md-8">
                 <label class="form-label">Diagnosis <span class="text-danger">*</span></label>
-                <input type="text" name="diagnosis" class="form-control" placeholder="e.g. Hypertension Stage 1" required />
+                <input type="text" name="diagnosis" class="form-control" value="@Model.Diagnosis" required />
             </div>
             <div class="col-md-4">
                 <label class="form-label">Visit Date <span class="text-danger">*</span></label>
-                <input type="date" name="visitDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                <input type="date" name="visitDate" class="form-control" value="@Model.VisitDate.ToString("yyyy-MM-dd")" required />
             </div>
         </div>
     </div>
@@ -33,13 +33,11 @@
         <div class="row g-3">
             <div class="col-12">
                 <label class="form-label">Treatment Plan <span class="text-danger">*</span></label>
-                <textarea name="treatment" class="form-control" rows="4"
-                          placeholder="Describe the treatment plan, prescriptions, and follow-up instructions…" required></textarea>
+                <textarea name="treatment" class="form-control" rows="4" required>@Model.Treatment</textarea>
             </div>
             <div class="col-12">
                 <label class="form-label">Clinical Notes <span style="color:#8faac4;font-weight:400;">(optional)</span></label>
-                <textarea name="notes" class="form-control" rows="3"
-                          placeholder="Observations, test results, referral notes…"></textarea>
+                <textarea name="notes" class="form-control" rows="3">@Model.Notes</textarea>
             </div>
         </div>
     </div>
@@ -48,18 +46,20 @@
         <div class="slabel">Record Status</div>
         <div class="d-flex gap-3">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="status" id="sActive" value="Active" checked />
-                <label class="form-check-label" for="sActive">Active — ongoing treatment</label>
+                <input class="form-check-input" type="radio" name="status" id="sActive" value="Active"
+                       @(Model.Status == "Active" ? "checked" : "") />
+                <label class="form-check-label" for="sActive">Active</label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="status" id="sClosed" value="Closed" />
-                <label class="form-check-label" for="sClosed">Closed — treatment complete</label>
+                <input class="form-check-input" type="radio" name="status" id="sClosed" value="Closed"
+                       @(Model.Status == "Closed" ? "checked" : "") />
+                <label class="form-check-label" for="sClosed">Closed</label>
             </div>
         </div>
     </div>
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i>Save Record</button>
-        <a href="/Doctor/PatientDetail/@ViewBag.PatientId" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i>Update Record</button>
+        <a href="/Doctor/PatientDetail/@Model.PatientId" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>

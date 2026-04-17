@@ -2,154 +2,129 @@
 @{
     ViewData["Title"] = "Dashboard";
     Layout = "_PatientLayout";
-    var lastResp = ViewBag.LastResponse as MediCore.Models.Complaint;
-    var recentComplaints = Model?.Complaints.OrderByDescending(c => c.UpdatedAt).Take(4).ToList() ?? new List<MediCore.Models.Complaint>();
+
+    string greet = DateTime.Now.Hour switch
+    {
+        >= 5 and < 12  => "Good morning",
+        >= 12 and < 17 => "Good afternoon",
+        >= 17 and < 22 => "Good evening",
+        _              => "Hello"
+    };
 }
+
+<style>
+    /* Hero welcome card — navy gradient, medical-website style */
+    .hero {
+        background: linear-gradient(135deg, #1e2d45 0%, #2c3f5c 100%);
+        border-radius: 10px;
+        padding: 28px 30px;
+        color: #fff;
+        box-shadow: 0 4px 18px rgba(30,45,69,.15);
+        margin-bottom: 22px;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        bottom: -80px;
+        width: 260px;
+        height: 260px;
+        background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .hero-greet { font-size:.82rem; color:#a7c0dc; font-weight:600; letter-spacing:.3px; margin-bottom:2px; }
+    .hero-name  { font-size:1.6rem; font-weight:700; margin-bottom:6px; line-height:1.1; }
+    .hero-sub   { font-size:.88rem; color:#c8d7ea; max-width:560px; line-height:1.55; margin:0; }
+    .hero-meta  {
+        display:flex; flex-wrap:wrap; gap:14px; margin-top:18px;
+        font-size:.81rem; color:#a7c0dc;
+    }
+    .hero-meta span { display:inline-flex; align-items:center; gap:6px; }
+    .hero-meta strong { color:#fff; font-weight:600; }
+
+    /* Quick-action tiles */
+    .qa-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; }
+    @@media (max-width: 900px) { .qa-row { grid-template-columns:repeat(2, 1fr); } }
+    .qa {
+        background:#fff; border-radius:8px; padding:18px 20px;
+        box-shadow:0 1px 5px rgba(0,0,0,.06);
+        text-decoration:none; color:inherit;
+        display:flex; align-items:center; gap:14px;
+        transition: transform .12s, box-shadow .12s, border-color .12s;
+        border-left: 3px solid transparent;
+    }
+    .qa:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        color: inherit;
+        border-left-color: #1e2d45;
+    }
+    .qa-ic {
+        width:44px; height:44px; border-radius:10px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.2rem; flex-shrink:0;
+    }
+    .qa-ttl  { font-weight:600; font-size:.92rem; color:#1e2d45; line-height:1.15; }
+    .qa-desc { font-size:.76rem; color:#8faac4; margin-top:3px; }
+</style>
 
 @if (Model == null)
 {
-    <div class="card p-4 text-center">
-        <i class="bi bi-person-x" style="font-size:2.5rem;color:#94a3b8;"></i>
-        <h6 class="mt-3 fw-semibold">No health record linked</h6>
+    <div class="card p-5 text-center" style="max-width:520px;margin:40px auto;">
+        <i class="bi bi-person-x" style="font-size:2.8rem;color:#94a3b8;opacity:.5;"></i>
+        <h6 class="mt-3 fw-semibold" style="color:#1e2d45;">No health record linked</h6>
         <p class="text-muted mb-0" style="font-size:.85rem;">Contact the reception desk to link your account.</p>
     </div>
 }
 else
 {
-    <div class="mb-3">
-        <h5 class="fw-bold mb-1" style="color:#1e2d45;">Hello, @Model.FullName</h5>
-        <p class="text-muted mb-0" style="font-size:.84rem;">Here is a summary of your health information.</p>
-    </div>
+    <section class="hero">
+        <div class="hero-greet">@greet,</div>
+        <h1 class="hero-name">@Model.FullName</h1>
+        <p class="hero-sub">
+            Welcome to your patient portal. Use the options below to view your
+            records, track problems, or update your details.
+        </p>
+        <div class="hero-meta">
+            <span><i class="bi bi-person-vcard"></i> Patient <strong>#@Model.Id</strong></span>
+            @if (!string.IsNullOrEmpty(Model.BloodGroup))
+            {
+                <span><i class="bi bi-droplet-fill"></i> Blood Group <strong>@Model.BloodGroup</strong></span>
+            }
+            <span><i class="bi bi-calendar-check"></i> Registered <strong>@Model.RegisteredOn.ToString("dd MMM yyyy")</strong></span>
+        </div>
+    </section>
 
-    <div class="row g-3 mb-4">
-        <div class="col-sm-4">
-            <div class="tile">
-                <div class="tile-ic" style="background:#fef9c3;">
-                    <i class="bi bi-chat-square-text" style="color:#854d0e;"></i>
-                </div>
-                <div>
-                    <div class="tile-n">@ViewBag.OpenCount</div>
-                    <div class="tile-l">Open Problems</div>
-                </div>
+    <div class="qa-row">
+        <a href="/Patient/SubmitComplaint" class="qa">
+            <div class="qa-ic" style="background:#fee2e2;color:#991b1b;"><i class="bi bi-plus-circle-fill"></i></div>
+            <div>
+                <div class="qa-ttl">Report a Problem</div>
+                <div class="qa-desc">Tell your doctor about symptoms</div>
             </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="tile">
-                <div class="tile-ic" style="background:#dbeafe;">
-                    <i class="bi bi-check2-circle" style="color:#1d4ed8;"></i>
-                </div>
-                <div>
-                    <div class="tile-n">@ViewBag.ReviewedCount</div>
-                    <div class="tile-l">Reviewed</div>
-                </div>
+        </a>
+        <a href="/Patient/MyRecords" class="qa">
+            <div class="qa-ic" style="background:#dbeafe;color:#1d4ed8;"><i class="bi bi-file-medical"></i></div>
+            <div>
+                <div class="qa-ttl">My Records</div>
+                <div class="qa-desc">View visits, diagnoses &amp; treatment</div>
             </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="tile">
-                <div class="tile-ic" style="background:#f0fdf4;">
-                    <i class="bi bi-file-medical" style="color:#16a34a;"></i>
-                </div>
-                <div>
-                    <div class="tile-n">@ViewBag.RecordCount</div>
-                    <div class="tile-l">Medical Records</div>
-                </div>
+        </a>
+        <a href="/Patient/MyComplaints" class="qa">
+            <div class="qa-ic" style="background:#fef9c3;color:#854d0e;"><i class="bi bi-chat-square-text"></i></div>
+            <div>
+                <div class="qa-ttl">My Problems</div>
+                <div class="qa-desc">Track submissions &amp; responses</div>
             </div>
-        </div>
-    </div>
-
-    @if (lastResp != null)
-    {
-        <div class="card mb-4">
-            <div class="card-header px-3 py-2" style="background:#f0fdf4;">
-                <i class="bi bi-reply text-success me-2"></i>Latest Doctor Response
+        </a>
+        <a href="/Patient/MyProfile" class="qa">
+            <div class="qa-ic" style="background:#dcfce7;color:#166534;"><i class="bi bi-person-gear"></i></div>
+            <div>
+                <div class="qa-ttl">My Profile</div>
+                <div class="qa-desc">Update personal &amp; clinical info</div>
             </div>
-            <div class="card-body">
-                <p class="text-muted mb-1" style="font-size:.82rem;">
-                    Your problem: <em>@lastResp.Description</em>
-                </p>
-                <div class="resp-box mt-2">
-                    <div class="fw-semibold mb-1" style="font-size:.83rem;">
-                        @lastResp.RespondedBy — @lastResp.RespondedAt?.ToString("dd MMM yyyy")
-                    </div>
-                    @lastResp.DoctorResponse
-                </div>
-            </div>
-        </div>
-    }
-
-    <div class="row g-3">
-        <div class="col-lg-5">
-            <div class="card">
-                <div class="card-header px-3 py-2 d-flex justify-content-between align-items-center">
-                    <span>My Details</span>
-                    <a href="/Patient/MyProfile" style="font-size:.79rem;color:#1e2d45;text-decoration:none;">View all</a>
-                </div>
-                <div class="card-body p-3">
-                    <div class="irow">
-                        <span class="ilbl">Date of Birth</span>
-                        <span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
-                    </div>
-                    <div class="irow">
-                        <span class="ilbl">Gender</span>
-                        <span>@(Model.Gender ?? "—")</span>
-                    </div>
-                    <div class="irow">
-                        <span class="ilbl">Blood Group</span>
-                        <span>@(Model.BloodGroup ?? "—")</span>
-                    </div>
-                    <div class="irow">
-                        <span class="ilbl">Phone</span>
-                        <span>@(Model.Phone ?? "—")</span>
-                    </div>
-                    <div class="irow">
-                        <span class="ilbl">Emergency</span>
-                        <span>@(Model.EmergencyContact ?? "—")</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-7">
-            <div class="card">
-                <div class="card-header px-3 py-2 d-flex justify-content-between align-items-center">
-                    <span>Recent Problems</span>
-                    <a href="/Patient/MyComplaints" style="font-size:.79rem;color:#1e2d45;text-decoration:none;">View all</a>
-                </div>
-                <div class="card-body p-0">
-                    @if (!recentComplaints.Any())
-                    {
-                        <div class="text-center py-4 text-muted">
-                            <i class="bi bi-chat-square-text" style="font-size:1.8rem;opacity:.3;"></i>
-                            <p class="mt-2 small mb-2">No problems submitted yet.</p>
-                        </div>
-                        <div class="text-center pb-3">
-                            <a href="/Patient/SubmitComplaint" class="btn btn-sm btn-g">Submit a Problem</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <table class="table mb-0">
-                            <thead>
-                                <tr><th>Problem</th><th>Date</th><th>Status</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var c in recentComplaints)
-                                {
-                                    <tr>
-                                        <td>@(c.Description.Length > 45 ? c.Description[..45] + "…" : c.Description)</td>
-                                        <td class="text-muted">@c.UpdatedAt.ToString("dd MMM")</td>
-                                        <td>
-                                            <span class="pill @(c.Status == "Active" ? "pill-a" : c.Status == "Reviewed" ? "pill-r" : "pill-d")">
-                                                @c.Status
-                                            </span>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
-            </div>
-        </div>
+        </a>
     </div>
 }

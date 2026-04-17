@@ -1,34 +1,37 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MediCore.Data;
 
 namespace MediCore.Controllers
 {
+    /// <summary>
+    /// HomeController — central routing hub after login.
+    /// Redirects each role to their own dashboard.
+    /// No DB queries here — just reads the session role and redirects.
+    /// </summary>
     public class HomeController : Controller
     {
-        private readonly AppDbContext _db;
-        public HomeController(AppDbContext db) => _db = db;
-
+        /// <summary>
+        /// GET /Home/Index
+        /// Called after login. Routes the user to the correct dashboard
+        /// based on their role stored in the session.
+        /// </summary>
         public IActionResult Index()
         {
             var role = HttpContext.Session.GetString("UserRole");
-            if (role == null) return RedirectToAction("Login", "Account");
-            if (role == "Patient") return RedirectToAction("Dashboard", "Patient");
-            // Admin-only dashboard
-            if (role != "Admin") return RedirectToAction("Login", "Account");
 
-            ViewBag.NewComplaints    = _db.Complaints.Count(c => !c.IsRead);
-            ViewBag.TotalPatients    = _db.Patients.Count();
-            ViewBag.TotalRecords     = _db.Records.Count();
-            ViewBag.RecentComplaints = _db.Complaints
-                .Include(c => c.Patient)
-                .OrderByDescending(c => c.UpdatedAt)
-                .Take(6)
-                .ToList();
+            // Not logged in — send to login page
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login", "Account");
 
-            ViewBag.PendingApprovals = _db.Users.Count(u => !u.IsActive && (u.Role == "Doctor" || u.Role == "Nurse" || u.Role == "Receptionist"));
-
-            return View();
+            // Route each role to their own dashboard
+            return role switch
+            {
+                "Admin"        => RedirectToAction("Index",     "Admin"),
+                "Doctor"       => RedirectToAction("Dashboard", "Doctor"),
+                "Patient"      => RedirectToAction("Dashboard", "Patient"),
+                "Nurse"        => RedirectToAction("Dashboard", "Doctor"),
+                "Receptionist" => RedirectToAction("Dashboard", "Doctor"),
+                _              => RedirectToAction("Login",     "Account")
+            };
         }
     }
 }

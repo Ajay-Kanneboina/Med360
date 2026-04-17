@@ -50,12 +50,12 @@
                 <tbody>
                     @foreach (var c in Model)
                     {
-                        <tr style="@(!c.IsRead ? "background:#fffbeb;" : "")">
+                        <tr class="@(!c.IsRead ? "unread-row" : "")">
                             <td>
                                 <div class="fw-semibold">@c.Patient?.FullName</div>
                                 @if (!c.IsRead)
                                 {
-                                    <span style="font-size:.71rem;color:#854d0e;font-weight:700;">● NEW</span>
+                                    <span class="new-badge">● NEW</span>
                                 }
                             </td>
                             <td style="max-width:280px;">
@@ -64,9 +64,9 @@
                             <td class="text-muted">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
                             <td class="text-muted">@c.UpdatedAt.ToString("dd MMM, hh:mm tt")</td>
                             <td>
-                                <span class="pill @(c.Status == "Active" ? "pill-a" : c.Status == "Reviewed" ? "pill-r" : "pill-d")">
-                                    @c.Status
-                                </span>
+                                @if (c.Status == "Active")          { <span class="pill pill-a">@c.Status</span> }
+                                else if (c.Status == "Reviewed")    { <span class="pill pill-r">@c.Status</span> }
+                                else                                { <span class="pill pill-d">@c.Status</span> }
                             </td>
                             <td>
                                 <a href="/Doctor/ViewComplaint/@c.Id"
