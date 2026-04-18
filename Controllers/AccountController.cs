@@ -70,7 +70,7 @@ namespace MediCore.Controllers
 
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult Register(string fullName, string email,
-                                      string password, string confirmPassword, string role)
+                                      string password, string confirmPassword, string role, string? phone = null)
         {
             if (password != confirmPassword)
             { ViewBag.Error = "Passwords do not match."; return View(); }
@@ -111,6 +111,7 @@ namespace MediCore.Controllers
                 Email        = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                 Role         = role,
+                Phone        = phone,
                 PatientId    = patientId,
                 IsActive     = !isStaffRole // staff roles are inactive until approved by admin
             });
@@ -118,8 +119,7 @@ namespace MediCore.Controllers
 
             _audit.Log(fullName,
                        isStaffRole ? "Registration Pending" : "Account Created / Approved",
-                       $"{role} — {email}",
-                       "User");
+                       $"{role} — {email}", "User", null);
 
             if (isStaffRole)
             {

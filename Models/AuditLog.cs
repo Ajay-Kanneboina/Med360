@@ -6,7 +6,8 @@ namespace MediCore.Models
     public class AuditLog
     {
         public int      Id        { get; set; }
-        public string   Actor     { get; set; } = "";   // who did it
+        public int?     UserId    { get; set; }           // FK to Users table
+        public string   Actor     { get; set; } = "";   // who did it (display name)
         public string   Action    { get; set; } = "";   // what they did
         public string   Target    { get; set; } = "";   // what was affected
         public string   Category  { get; set; } = "";   // "User" / "Record" / "Complaint"

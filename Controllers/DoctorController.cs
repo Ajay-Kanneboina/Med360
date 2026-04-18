@@ -148,7 +148,7 @@ namespace MediCore.Controllers
             var doctorName  = HttpContext.Session.GetString("UserName") ?? "Unknown";
             var patientName = _doctorService.GetPatientDetail(patientId)?.FullName ?? $"Patient #{patientId}";
             _doctorService.AddRecord(patientId, diagnosis, treatment, notes, visitDate, status, doctorName);
-            _audit.Log(doctorName, "Medical Record Added", patientName, "Record");
+            _audit.Log(doctorName, "Medical Record Added", patientName, "Record", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Medical record saved successfully.";
             return RedirectToAction(nameof(PatientDetail), new { id = patientId });
@@ -189,7 +189,7 @@ namespace MediCore.Controllers
             var updated     = _doctorService.GetRecord(id);
             var doctorName  = HttpContext.Session.GetString("UserName") ?? "Unknown";
             var patientName = updated?.Patient?.FullName ?? $"Patient #{updated?.PatientId}";
-            _audit.Log(doctorName, "Medical Record Updated", patientName, "Record");
+            _audit.Log(doctorName, "Medical Record Updated", patientName, "Record", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Record updated.";
             return RedirectToAction(nameof(PatientDetail), new { id = updated?.PatientId });
@@ -210,7 +210,7 @@ namespace MediCore.Controllers
             var doctorName  = HttpContext.Session.GetString("UserName") ?? "Unknown";
             var patientName = record.Patient?.FullName ?? $"Patient #{patientId}";
             _doctorService.CloseRecord(id);
-            _audit.Log(doctorName, "Medical Record Closed", patientName, "Record");
+            _audit.Log(doctorName, "Medical Record Closed", patientName, "Record", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Record archived.";
             return RedirectToAction(nameof(PatientDetail), new { id = patientId });
@@ -253,7 +253,7 @@ namespace MediCore.Controllers
             if (!_doctorService.RespondToComplaint(id, response, status, doctorName))
                 return NotFound();
 
-            _audit.Log(doctorName, "Complaint Responded", $"Complaint #{id}", "Complaint");
+            _audit.Log(doctorName, "Complaint Responded", $"Complaint #{id}", "Complaint", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Response sent to patient.";
             return RedirectToAction(nameof(Complaints));

@@ -146,7 +146,7 @@ namespace MediCore.Controllers
 
             var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
             var shortDesc   = description.Length > 60 ? description[..60] + "…" : description;
-            _audit.Log(patientName, "Complaint Submitted", shortDesc, "Complaint");
+            _audit.Log(patientName, "Complaint Submitted", shortDesc, "Complaint", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Problem submitted. A doctor will respond soon.";
             return RedirectToAction(nameof(MyComplaints));
@@ -184,7 +184,7 @@ namespace MediCore.Controllers
                 return NotFound();
 
             var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
-            _audit.Log(patientName, "Complaint Updated", $"Complaint #{id}", "Complaint");
+            _audit.Log(patientName, "Complaint Updated", $"Complaint #{id}", "Complaint", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Problem updated. The doctor will be notified.";
             return RedirectToAction(nameof(MyComplaints));

@@ -111,7 +111,7 @@ namespace MediCore.Controllers
             if (user == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "Account Approved", $"{user.Role} — {user.Email}", "User");
+            _audit.Log(admin, "Account Approved", $"{user.Role} — {user.Email}", "User", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = $"{user.FullName} has been approved and can now log in.";
             return RedirectToAction(nameof(PendingUsers));
@@ -131,7 +131,7 @@ namespace MediCore.Controllers
             if (name == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "Account Rejected", name, "User");
+            _audit.Log(admin, "Account Rejected", name, "User", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "User registration rejected and removed.";
             return RedirectToAction(nameof(PendingUsers));
@@ -167,7 +167,7 @@ namespace MediCore.Controllers
             if (user == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, user.IsActive ? "User Activated" : "User Deactivated", $"{user.Role} — {user.Email}", "User");
+            _audit.Log(admin, user.IsActive ? "User Activated" : "User Deactivated", $"{user.Role} — {user.Email}", "User", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = $"{user.FullName} is now {(user.IsActive ? "active" : "deactivated")}.";
             return RedirectToAction(nameof(AllUsers));
@@ -186,7 +186,7 @@ namespace MediCore.Controllers
             if (name == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "User Deleted", name, "User");
+            _audit.Log(admin, "User Deleted", name, "User", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "User deleted permanently.";
             return RedirectToAction(nameof(AllUsers));
@@ -238,7 +238,7 @@ namespace MediCore.Controllers
             if (!_adminService.DeletePatient(id)) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "Patient Deleted", patient.FullName, "User");
+            _audit.Log(admin, "Patient Deleted", patient.FullName, "User", HttpContext.Session.GetInt32("UserId"));
 
             TempData["Success"] = "Patient and all associated records removed.";
             return RedirectToAction(nameof(AllPatients));
