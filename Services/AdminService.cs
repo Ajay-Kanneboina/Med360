@@ -251,58 +251,20 @@ namespace MediCore.Services
         /// </summary>
         public List<AuditEntry> GetAuditEntries(int take = 80)
         {
-            var entries = new List<AuditEntry>();
-
-            // User account events
-            foreach (var u in _db.Users.OrderByDescending(x => x.CreatedAt).Take(30))
-                entries.Add(new AuditEntry
-                {
-                    Actor     = u.FullName,
-                    Action    = u.IsActive ? "Account Created / Approved" : "Registration Pending",
-                    Target    = $"{u.Role} — {u.Email}",
-                    Timestamp = u.CreatedAt,
-                    Category  = "User"
-                });
-
-            // Medical record creation events
-            foreach (var r in _db.Records.Include(x => x.Patient)
-                                         .OrderByDescending(x => x.CreatedAt).Take(30))
-                entries.Add(new AuditEntry
-                {
-                    Actor     = r.DoctorName ?? "Doctor",
-                    Action    = "Medical Record Added",
-                    Target    = r.Patient?.FullName ?? $"Patient #{r.PatientId}",
-                    Timestamp = r.CreatedAt,
-                    Category  = "Record"
-                });
-
-            // Complaint lifecycle events
-            foreach (var c in _db.Complaints.Include(x => x.Patient)
-                                             .OrderByDescending(x => x.SubmittedAt).Take(30))
-            {
-                entries.Add(new AuditEntry
-                {
-                    Actor     = c.Patient?.FullName ?? $"Patient #{c.PatientId}",
-                    Action    = "Complaint Submitted",
-                    Target    = c.Description.Length > 60 ? c.Description[..60] + "…" : c.Description,
-                    Timestamp = c.SubmittedAt,
-                    Category  = "Complaint"
-                });
-
-                // Only add a response event if the complaint was actually responded to
-                if (c.RespondedAt.HasValue)
-                    entries.Add(new AuditEntry
-                    {
-                        Actor     = c.RespondedBy ?? "Staff",
-                        Action    = "Complaint Responded",
-                        Target    = c.Patient?.FullName ?? $"Patient #{c.PatientId}",
-                        Timestamp = c.RespondedAt.Value,
-                        Category  = "Complaint"
-                    });
-            }
-
-            // Merge and sort all events by newest first
-            return entries.OrderByDescending(e => e.Timestamp).Take(take).ToList();
+            // Now reads from the real AuditLogs table — events are permanent,
+            // even if the original patient/record/user gets deleted.
+            return _db.AuditLogs
+                      .OrderByDescending(a => a.Timestamp)
+                      .Take(take)
+                      .Select(a => new AuditEntry
+                      {
+                          Actor     = a.Actor,
+                          Action    = a.Action,
+                          Target    = a.Target,
+                          Category  = a.Category,
+                          Timestamp = a.Timestamp
+                      })
+                      .ToList();
         }
 
         // ── Analytics ─────────────────────────────────────────────────────

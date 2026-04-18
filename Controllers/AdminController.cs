@@ -22,16 +22,13 @@ namespace MediCore.Controllers
     /// </summary>
     public class AdminController : Controller
     {
-        // Service injected via constructor — controller never touches DbContext directly
         private readonly IAdminService _adminService;
+        private readonly IAuditService _audit;
 
-        /// <summary>
-        /// Constructor: IAdminService is resolved by ASP.NET Core DI.
-        /// Registered in Program.cs as AddScoped.
-        /// </summary>
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, IAuditService audit)
         {
             _adminService = adminService;
+            _audit        = audit;
         }
 
         // ── Auth guard ────────────────────────────────────────────────────
@@ -113,6 +110,9 @@ namespace MediCore.Controllers
             var user = _adminService.ApproveUser(id);
             if (user == null) return NotFound();
 
+            var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
+            _audit.Log(admin, "Account Approved", $"{user.Role} — {user.Email}", "User");
+
             TempData["Success"] = $"{user.FullName} has been approved and can now log in.";
             return RedirectToAction(nameof(PendingUsers));
         }
@@ -129,6 +129,9 @@ namespace MediCore.Controllers
 
             var name = _adminService.RejectUser(id);
             if (name == null) return NotFound();
+
+            var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
+            _audit.Log(admin, "Account Rejected", name, "User");
 
             TempData["Success"] = "User registration rejected and removed.";
             return RedirectToAction(nameof(PendingUsers));
@@ -163,6 +166,9 @@ namespace MediCore.Controllers
             var user = _adminService.ToggleUserActive(id);
             if (user == null) return NotFound();
 
+            var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
+            _audit.Log(admin, user.IsActive ? "User Activated" : "User Deactivated", $"{user.Role} — {user.Email}", "User");
+
             TempData["Success"] = $"{user.FullName} is now {(user.IsActive ? "active" : "deactivated")}.";
             return RedirectToAction(nameof(AllUsers));
         }
@@ -178,6 +184,9 @@ namespace MediCore.Controllers
 
             var name = _adminService.DeleteUser(id);
             if (name == null) return NotFound();
+
+            var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
+            _audit.Log(admin, "User Deleted", name, "User");
 
             TempData["Success"] = "User deleted permanently.";
             return RedirectToAction(nameof(AllUsers));
@@ -224,7 +233,12 @@ namespace MediCore.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
+            var patient = _adminService.GetPatientDetail(id);
+            if (patient == null) return NotFound();
             if (!_adminService.DeletePatient(id)) return NotFound();
+
+            var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
+            _audit.Log(admin, "Patient Deleted", patient.FullName, "User");
 
             TempData["Success"] = "Patient and all associated records removed.";
             return RedirectToAction(nameof(AllPatients));

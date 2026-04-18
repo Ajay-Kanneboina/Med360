@@ -11,6 +11,7 @@ namespace MediCore.Data
         public DbSet<Patient>   Patients   { get; set; }
         public DbSet<Complaint> Complaints { get; set; }
         public DbSet<Record>    Records    { get; set; }
+        public DbSet<AuditLog>  AuditLogs  { get; set; }
 
         protected override void OnModelCreating(ModelBuilder m)
         {

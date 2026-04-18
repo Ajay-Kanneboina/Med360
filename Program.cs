@@ -17,6 +17,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IAdminService,   AdminService>();
 builder.Services.AddScoped<IDoctorService,  DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IAuditService,   AuditService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(o =>
@@ -72,6 +73,60 @@ using (var scope = app.Services.CreateScope())
         }
         // If config values are missing, no admin is created and the operator must
         // configure BootstrapAdmin in appsettings.json (or env vars) and restart.
+    }
+
+    // ── Seed existing events into AuditLogs table (runs once) ────────────
+    // Before this fix, audit events were assembled on-the-fly from other tables.
+    // Now we have a real AuditLogs table. On first run, we copy existing events
+    // into it so history is not lost. After that, every action writes directly.
+    if (!db.AuditLogs.Any())
+    {
+        var seeds = new List<AuditLog>();
+
+        foreach (var u in db.Users.ToList())
+            seeds.Add(new AuditLog
+            {
+                Actor     = u.FullName,
+                Action    = u.IsActive ? "Account Created / Approved" : "Registration Pending",
+                Target    = $"{u.Role} — {u.Email}",
+                Category  = "User",
+                Timestamp = u.CreatedAt
+            });
+
+        foreach (var r in db.Records.Include(x => x.Patient).ToList())
+            seeds.Add(new AuditLog
+            {
+                Actor     = r.DoctorName ?? "Doctor",
+                Action    = "Medical Record Added",
+                Target    = r.Patient?.FullName ?? $"Patient #{r.PatientId}",
+                Category  = "Record",
+                Timestamp = r.CreatedAt
+            });
+
+        foreach (var c in db.Complaints.Include(x => x.Patient).ToList())
+        {
+            seeds.Add(new AuditLog
+            {
+                Actor     = c.Patient?.FullName ?? $"Patient #{c.PatientId}",
+                Action    = "Complaint Submitted",
+                Target    = c.Description.Length > 60 ? c.Description[..60] + "…" : c.Description,
+                Category  = "Complaint",
+                Timestamp = c.SubmittedAt
+            });
+
+            if (c.RespondedAt.HasValue)
+                seeds.Add(new AuditLog
+                {
+                    Actor     = c.RespondedBy ?? "Staff",
+                    Action    = "Complaint Responded",
+                    Target    = c.Patient?.FullName ?? $"Patient #{c.PatientId}",
+                    Category  = "Complaint",
+                    Timestamp = c.RespondedAt.Value
+                });
+        }
+
+        db.AuditLogs.AddRange(seeds);
+        db.SaveChanges();
     }
 }
 

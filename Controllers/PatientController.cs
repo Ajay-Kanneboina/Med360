@@ -22,16 +22,13 @@ namespace MediCore.Controllers
     /// </summary>
     public class PatientController : Controller
     {
-        // Service injected via DI — no DbContext in this controller
         private readonly IPatientService _patientService;
+        private readonly IAuditService   _audit;
 
-        /// <summary>
-        /// Constructor: IPatientService resolved by ASP.NET Core DI.
-        /// Registered in Program.cs as AddScoped.
-        /// </summary>
-        public PatientController(IPatientService patientService)
+        public PatientController(IPatientService patientService, IAuditService audit)
         {
             _patientService = patientService;
+            _audit          = audit;
         }
 
         // ── Auth helpers ──────────────────────────────────────────────────
@@ -145,8 +142,11 @@ namespace MediCore.Controllers
                 return View();
             }
 
-            // Service handles all default value stamping (Status, IsRead, timestamps)
             _patientService.SubmitComplaint(Pid(), description, additionalNotes);
+
+            var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
+            var shortDesc   = description.Length > 60 ? description[..60] + "…" : description;
+            _audit.Log(patientName, "Complaint Submitted", shortDesc, "Complaint");
 
             TempData["Success"] = "Problem submitted. A doctor will respond soon.";
             return RedirectToAction(nameof(MyComplaints));
@@ -180,9 +180,11 @@ namespace MediCore.Controllers
                 return RedirectToAction(nameof(MyComplaints));
             }
 
-            // Service handles IsRead reset, UpdatedAt stamp, ownership guard
             if (!_patientService.UpdateComplaint(id, Pid(), description, additionalNotes))
                 return NotFound();
+
+            var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
+            _audit.Log(patientName, "Complaint Updated", $"Complaint #{id}", "Complaint");
 
             TempData["Success"] = "Problem updated. The doctor will be notified.";
             return RedirectToAction(nameof(MyComplaints));

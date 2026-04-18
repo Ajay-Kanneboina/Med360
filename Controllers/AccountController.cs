@@ -1,13 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using MediCore.Data;
 using MediCore.Models;
+using MediCore.Services;
 
 namespace MediCore.Controllers
 {
     public class AccountController : Controller
     {
         private readonly AppDbContext _db;
-        public AccountController(AppDbContext db) => _db = db;
+        private readonly IAuditService _audit;
+
+        public AccountController(AppDbContext db, IAuditService audit)
+        {
+            _db    = db;
+            _audit = audit;
+        }
 
         public IActionResult Login()
         {
@@ -108,6 +115,11 @@ namespace MediCore.Controllers
                 IsActive     = !isStaffRole // staff roles are inactive until approved by admin
             });
             _db.SaveChanges();
+
+            _audit.Log(fullName,
+                       isStaffRole ? "Registration Pending" : "Account Created / Approved",
+                       $"{role} — {email}",
+                       "User");
 
             if (isStaffRole)
             {

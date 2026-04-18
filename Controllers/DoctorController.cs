@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MediCore.Services;
+using MediCore.Models;
 
 namespace MediCore.Controllers
 {
@@ -11,10 +12,12 @@ namespace MediCore.Controllers
     public class DoctorController : Controller
     {
         private readonly IDoctorService _doctorService;
+        private readonly IAuditService  _audit;
 
-        public DoctorController(IDoctorService doctorService)
+        public DoctorController(IDoctorService doctorService, IAuditService audit)
         {
             _doctorService = doctorService;
+            _audit         = audit;
         }
 
         // ── Auth guards ───────────────────────────────────────────────────
@@ -142,8 +145,10 @@ namespace MediCore.Controllers
                 return View();
             }
 
-            var doctorName = HttpContext.Session.GetString("UserName") ?? "Unknown";
+            var doctorName  = HttpContext.Session.GetString("UserName") ?? "Unknown";
+            var patientName = _doctorService.GetPatientDetail(patientId)?.FullName ?? $"Patient #{patientId}";
             _doctorService.AddRecord(patientId, diagnosis, treatment, notes, visitDate, status, doctorName);
+            _audit.Log(doctorName, "Medical Record Added", patientName, "Record");
 
             TempData["Success"] = "Medical record saved successfully.";
             return RedirectToAction(nameof(PatientDetail), new { id = patientId });
@@ -181,7 +186,11 @@ namespace MediCore.Controllers
             if (!_doctorService.UpdateRecord(id, diagnosis, treatment, notes, visitDate, status))
                 return NotFound();
 
-            var updated = _doctorService.GetRecord(id);
+            var updated     = _doctorService.GetRecord(id);
+            var doctorName  = HttpContext.Session.GetString("UserName") ?? "Unknown";
+            var patientName = updated?.Patient?.FullName ?? $"Patient #{updated?.PatientId}";
+            _audit.Log(doctorName, "Medical Record Updated", patientName, "Record");
+
             TempData["Success"] = "Record updated.";
             return RedirectToAction(nameof(PatientDetail), new { id = updated?.PatientId });
         }
@@ -197,8 +206,11 @@ namespace MediCore.Controllers
             var record = _doctorService.GetRecord(id);
             if (record == null) return NotFound();
 
-            int patientId = record.PatientId;
+            int patientId   = record.PatientId;
+            var doctorName  = HttpContext.Session.GetString("UserName") ?? "Unknown";
+            var patientName = record.Patient?.FullName ?? $"Patient #{patientId}";
             _doctorService.CloseRecord(id);
+            _audit.Log(doctorName, "Medical Record Closed", patientName, "Record");
 
             TempData["Success"] = "Record archived.";
             return RedirectToAction(nameof(PatientDetail), new { id = patientId });
@@ -240,6 +252,8 @@ namespace MediCore.Controllers
 
             if (!_doctorService.RespondToComplaint(id, response, status, doctorName))
                 return NotFound();
+
+            _audit.Log(doctorName, "Complaint Responded", $"Complaint #{id}", "Complaint");
 
             TempData["Success"] = "Response sent to patient.";
             return RedirectToAction(nameof(Complaints));
