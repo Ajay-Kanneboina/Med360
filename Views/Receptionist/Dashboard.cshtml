@@ -1,0 +1,198 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Receptionist Dashboard";
+    var recentPatients   = ViewBag.RecentPatients   as List<MediCore.Models.Patient>   ?? new();
+    var recentComplaints = ViewBag.RecentComplaints as List<MediCore.Models.Complaint> ?? new();
+    var doctors          = ViewBag.Doctors          as List<MediCore.Models.User>      ?? new();
+}
+
+<p class="page-s">Welcome back — here's the front desk overview.</p>
+
+@* ── KPI Cards ── *@
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-4">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-people me-1"></i>Total Patients</div>
+            <div class="stat-n">@ViewBag.TotalPatients</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-file-medical me-1"></i>Total Records</div>
+            <div class="stat-n">@ViewBag.TotalRecords</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-chat-square-text me-1"></i>Unread Complaints</div>
+            <div class="stat-n text-danger">@ViewBag.TotalComplaints</div>
+        </div>
+    </div>
+</div>
+
+@* ── Quick Actions ── *@
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="sbox">
+            <div class="slabel">Quick Actions</div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/Doctor/Patients" class="btn btn-sm btn-primary">
+                    <i class="bi bi-people me-1"></i> All Patients
+                </a>
+                <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-chat-square-text me-1"></i> All Complaints
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+
+    @* ── Recently Registered Patients ── *@
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person-plus me-2" style="color:#0f766e;"></i>Recently Registered Patients</span>
+                <a href="/Doctor/Patients" class="stat-l text-decoration-none">View all →</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentPatients.Any())
+                {
+                    <div class="text-center py-4 stat-l">No patients registered yet.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var p in recentPatients)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@p.FullName</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(p.Gender))
+                                    {
+                                        <span class="pill pill-r">@p.Gender</span>
+                                    }
+                                    else { <span class="stat-l">—</span> }
+                                </td>
+                                <td class="stat-l">@p.RegisteredOn.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ── Recent Complaints ── *@
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-square-text me-2 text-danger"></i>Recent Complaints</span>
+                <a href="/Doctor/Complaints" class="stat-l text-decoration-none">View all →</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentComplaints.Any())
+                {
+                    <div class="text-center py-4 stat-l">No complaints yet.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var c in recentComplaints)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@(c.Patient?.FullName ?? "—")</td>
+                                <td>
+                                    @if (c.Status == "Active")       { <span class="pill pill-a">Active</span> }
+                                    else if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
+                                    else                             { <span class="pill pill-x">@c.Status</span> }
+                                </td>
+                                <td class="stat-l">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@* ── All Doctors ── *@
+<div class="row g-3 mt-1">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person-badge me-2" style="color:#0f766e;"></i>Doctors in this System</span>
+                <span class="stat-l">@doctors.Count doctor(s)</span>
+            </div>
+            <div class="card-body p-0">
+                @if (!doctors.Any())
+                {
+                    <div class="text-center py-4 stat-l">No doctors registered yet.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @{ int i = 1; }
+                        @foreach (var doc in doctors)
+                        {
+                            <tr>
+                                <td class="stat-l">@i</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:32px;height:32px;border-radius:50%;background:#f0fdfa;border:1px solid #99f6e4;display:flex;align-items:center;justify-content:center;">
+                                            <i class="bi bi-person" style="color:#0f766e;font-size:.85rem;"></i>
+                                        </div>
+                                        <span class="fw-semibold">@doc.FullName</span>
+                                    </div>
+                                </td>
+                                <td class="stat-l">@doc.Email</td>
+                                <td>
+                                    @if (doc.IsActive)
+                                    {
+                                        <span class="pill pill-d"><i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill pill-x">Inactive</span>
+                                    }
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>

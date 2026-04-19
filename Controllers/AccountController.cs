@@ -60,9 +60,14 @@ namespace MediCore.Controllers
                 return RedirectToAction("Dashboard", "Doctor");
 
             if (user.Role == "Admin")
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Admin");
 
-            // Other staff roles (Receptionist, Nurse) for now go to the main home area
+            if (user.Role == "Nurse")
+                return RedirectToAction("Dashboard", "Nurse");
+
+            if (user.Role == "Receptionist")
+                return RedirectToAction("Dashboard", "Receptionist");
+
             return RedirectToAction("Index", "Home");
         }
 

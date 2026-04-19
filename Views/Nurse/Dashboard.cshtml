@@ -1,0 +1,148 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Nurse Dashboard";
+    var recentPatients   = ViewBag.RecentPatients   as List<MediCore.Models.Patient>   ?? new();
+    var recentComplaints = ViewBag.RecentComplaints as List<MediCore.Models.Complaint> ?? new();
+}
+
+<p class="page-s">Welcome back — here's a quick overview of today's activity.</p>
+
+@* ── KPI Cards ── *@
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-people me-1"></i>Total Patients</div>
+            <div class="stat-n">@ViewBag.TotalPatients</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-file-medical me-1"></i>Total Records</div>
+            <div class="stat-n">@ViewBag.TotalRecords</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-folder2-open me-1"></i>Active Records</div>
+            <div class="stat-n">@ViewBag.ActiveRecords</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-chat-square-text me-1"></i>Unread Complaints</div>
+            <div class="stat-n text-danger">@ViewBag.UnreadComplaints</div>
+        </div>
+    </div>
+</div>
+
+@* ── Quick Actions ── *@
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="sbox">
+            <div class="slabel">Quick Actions</div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/Doctor/Patients" class="btn btn-sm btn-primary">
+                    <i class="bi bi-people me-1"></i> View All Patients
+                </a>
+                <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-chat-square-text me-1"></i> View Complaints
+                </a>
+                <a href="/Doctor/Complaints?filter=unread" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-envelope-exclamation me-1"></i> Unread Complaints
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+
+    @* ── Priority Patients ── *@
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person-exclamation me-2 text-warning"></i>Priority Patients</span>
+                <a href="/Doctor/Patients" class="stat-l text-decoration-none">View all →</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentPatients.Any())
+                {
+                    <div class="text-center py-4 stat-l">No patients found.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Blood</th>
+                                <th>Open Complaints</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var p in recentPatients)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@p.FullName</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(p.BloodGroup))
+                                    {
+                                        <span class="pill pill-r">@p.BloodGroup</span>
+                                    }
+                                    else { <span class="stat-l">—</span> }
+                                </td>
+                                <td>
+                                    <span class="pill pill-a">@p.Complaints.Count(c => c.Status == "Active")</span>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ── Recent Complaints ── *@
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-chat-square-text me-2 text-danger"></i>Recent Complaints</span>
+                <a href="/Doctor/Complaints" class="stat-l text-decoration-none">View all →</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentComplaints.Any())
+                {
+                    <div class="text-center py-4 stat-l">No complaints yet.</div>
+                }
+                else
+                {
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var c in recentComplaints)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@(c.Patient?.FullName ?? "—")</td>
+                                <td>
+                                    @if (c.Status == "Active")      { <span class="pill pill-a">Active</span> }
+                                    else if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
+                                    else                             { <span class="pill pill-x">@c.Status</span> }
+                                </td>
+                                <td class="stat-l">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>

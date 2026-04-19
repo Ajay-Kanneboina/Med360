@@ -225,7 +225,7 @@
                 <i class="bi bi-bar-chart-line"></i> Analytics
             </a>
         }
-        else
+        else if (urole == "Doctor")
         {
             <div class="sb-grp">Overview</div>
             <a href="/Doctor/Dashboard" class="sb-link @(upath.StartsWith("/Doctor/Dashboard") ? "sb-on" : "")">
@@ -242,6 +242,45 @@
             </a>
             <a href="/Doctor/Complaints?filter=unread" class="sb-link @(upath.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-envelope-exclamation"></i> Unread
+            </a>
+        }
+        else if (urole == "Nurse")
+        {
+            <div class="sb-grp">Overview</div>
+            <a href="/Nurse/Dashboard" class="sb-link @(upath.StartsWith("/Nurse/Dashboard") ? "sb-on" : "")">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+            </a>
+            <div class="sb-grp">Patients</div>
+            <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
+                <i class="bi bi-people"></i> All Patients
+            </a>
+            <div class="sb-grp">Complaints</div>
+            <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" ? "sb-on" : "")">
+                <i class="bi bi-chat-square-text"></i> All Complaints
+                @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
+            </a>
+            <a href="/Doctor/Complaints?filter=unread" class="sb-link @(upath.Contains("filter=unread") ? "sb-on" : "")">
+                <i class="bi bi-envelope-exclamation"></i> Unread
+            </a>
+        }
+        else if (urole == "Receptionist")
+        {
+            <div class="sb-grp">Overview</div>
+            <a href="/Receptionist/Dashboard" class="sb-link @(upath == "/Receptionist/Dashboard" ? "sb-on" : "")">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+            </a>
+            <div class="sb-grp">Staff</div>
+            <a href="/Receptionist/Doctors" class="sb-link @(upath.StartsWith("/Receptionist/Doctors") ? "sb-on" : "")">
+                <i class="bi bi-person-badge"></i> All Doctors
+            </a>
+            <div class="sb-grp">Patients</div>
+            <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
+                <i class="bi bi-people"></i> All Patients
+            </a>
+            <div class="sb-grp">Complaints</div>
+            <a href="/Doctor/Complaints" class="sb-link @(upath == "/Doctor/Complaints" ? "sb-on" : "")">
+                <i class="bi bi-chat-square-text"></i> All Complaints
+                @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
             </a>
         }
         </nav>

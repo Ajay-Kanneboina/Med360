@@ -1,0 +1,94 @@
+@model List<MediCore.Models.User>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "All Doctors";
+}
+
+<p class="page-s">All registered doctors in the MediCore360 system.</p>
+
+@* ── Search Bar ── *@
+<div class="sbox mb-3">
+    <form method="get" class="d-flex gap-2">
+        <input type="text"
+               name="search"
+               value="@ViewBag.Search"
+               class="form-control"
+               placeholder="Search by name or email..." />
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-search"></i>
+        </button>
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+        {
+            <a href="/Receptionist/Doctors" class="btn btn-outline-secondary">Clear</a>
+        }
+    </form>
+</div>
+
+@* ── Doctors Table ── *@
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-person-badge me-2" style="color:#0f766e;"></i>Doctors</span>
+        <span class="stat-l">@Model.Count result(s)</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-person-x" style="font-size:2rem;color:#99f6e4;"></i>
+                <div class="stat-l mt-2">No doctors found.</div>
+            </div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Doctor</th>
+                        <th>Email</th>
+                        <th>Joined</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @{ int i = 1; }
+                @foreach (var doc in Model)
+                {
+                    <tr>
+                        <td class="stat-l">@i</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:36px;height:36px;border-radius:50%;
+                                            background:linear-gradient(135deg,#0f766e,#14b8a6);
+                                            display:flex;align-items:center;justify-content:center;
+                                            color:#fff;font-size:.85rem;font-weight:700;flex-shrink:0;">
+                                    @doc.FullName.Substring(0, 1).ToUpper()
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">@doc.FullName</div>
+                                    <div class="stat-l">Doctor</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="stat-l">@doc.Email</td>
+                        <td class="stat-l">@doc.CreatedAt.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (doc.IsActive)
+                            {
+                                <span class="pill pill-d">
+                                    <i class="bi bi-circle-fill me-1" style="font-size:.45rem;"></i>Active
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="pill pill-x">Inactive</span>
+                            }
+                        </td>
+                    </tr>
+                    i++;
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
