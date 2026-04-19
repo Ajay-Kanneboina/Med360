@@ -163,7 +163,9 @@
     }
     @if (TempData["Info"] != null)
     {
-        <div class="err"><i class="bi bi-info-circle me-1"></i>@TempData["Info"]</div>
+        <div style="background:#eff6ff;color:#1d4ed8;border-radius:8px;padding:9px 13px;font-size:.82rem;margin-bottom:14px;">
+            <i class="bi bi-info-circle me-1"></i>@TempData["Info"]
+        </div>
     }
 
     <form method="post">

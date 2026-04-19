@@ -175,6 +175,7 @@
     var uname = Context.Session.GetString("UserName") ?? "";
     var urole = Context.Session.GetString("UserRole") ?? "";
     var upath = Context.Request.Path.Value ?? "";
+    var uqs   = Context.Request.QueryString.Value ?? "";   // query string e.g. "?filter=unread"
     bool isStaff = !string.IsNullOrEmpty(uname) && urole != "Patient";
     int nc = 0;
     if (isStaff)
@@ -236,11 +237,11 @@
                 <i class="bi bi-people"></i> All Patients
             </a>
             <div class="sb-grp">Complaints</div>
-            <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" ? "sb-on" : "")">
+            <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-chat-square-text"></i> All Complaints
                 @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
             </a>
-            <a href="/Doctor/Complaints?filter=unread" class="sb-link @(upath.Contains("filter=unread") ? "sb-on" : "")">
+            <a href="/Doctor/Complaints?filter=unread" class="sb-link @(uqs.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-envelope-exclamation"></i> Unread
             </a>
         }
@@ -255,11 +256,11 @@
                 <i class="bi bi-people"></i> All Patients
             </a>
             <div class="sb-grp">Complaints</div>
-            <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" ? "sb-on" : "")">
+            <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-chat-square-text"></i> All Complaints
                 @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
             </a>
-            <a href="/Doctor/Complaints?filter=unread" class="sb-link @(upath.Contains("filter=unread") ? "sb-on" : "")">
+            <a href="/Doctor/Complaints?filter=unread" class="sb-link @(uqs.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-envelope-exclamation"></i> Unread
             </a>
         }

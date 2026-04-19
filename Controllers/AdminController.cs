@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using MediCore.Controllers;
 using MediCore.Services;
 
 namespace MediCore.Controllers

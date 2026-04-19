@@ -28,8 +28,8 @@ namespace MediCore.Controllers
                 "Admin"        => RedirectToAction("Index",     "Admin"),
                 "Doctor"       => RedirectToAction("Dashboard", "Doctor"),
                 "Patient"      => RedirectToAction("Dashboard", "Patient"),
-                "Nurse"        => RedirectToAction("Dashboard", "Doctor"),
-                "Receptionist" => RedirectToAction("Dashboard", "Doctor"),
+                "Nurse"        => RedirectToAction("Dashboard", "Nurse"),
+                "Receptionist" => RedirectToAction("Dashboard", "Receptionist"),
                 _              => RedirectToAction("Login",     "Account")
             };
         }

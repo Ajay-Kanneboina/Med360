@@ -82,7 +82,10 @@ namespace MediCore.Services
                 q = q.Where(u => u.Role == role);
 
             if (!string.IsNullOrWhiteSpace(search))
-                q = q.Where(u => u.FullName.Contains(search) || u.Email.Contains(search));
+            {
+                var s = search.ToLower();
+                q = q.Where(u => u.FullName.ToLower().Contains(s) || u.Email.ToLower().Contains(s));
+            }
 
             return q.OrderBy(u => u.Role).ThenBy(u => u.FullName).ToList();
         }
@@ -156,10 +159,13 @@ namespace MediCore.Services
                        .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.ToLower();
                 q = q.Where(p =>
-                    p.FullName.Contains(search) ||
-                    (p.Email  != null && p.Email.Contains(search)) ||
-                    (p.Phone  != null && p.Phone.Contains(search)));
+                    p.FullName.ToLower().Contains(s) ||
+                    (p.Email  != null && p.Email.ToLower().Contains(s)) ||
+                    (p.Phone  != null && p.Phone.ToLower().Contains(s)));
+            }
 
             if (!string.IsNullOrWhiteSpace(gender))
                 q = q.Where(p => p.Gender == gender);
@@ -202,10 +208,13 @@ namespace MediCore.Services
                 q = q.Where(r => r.Status == status);
 
             if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.ToLower();
                 q = q.Where(r =>
-                    r.Diagnosis.Contains(search) ||
-                    r.Treatment.Contains(search) ||
-                    (r.Patient != null && r.Patient.FullName.Contains(search)));
+                    r.Diagnosis.ToLower().Contains(s) ||
+                    r.Treatment.ToLower().Contains(s) ||
+                    (r.Patient != null && r.Patient.FullName.ToLower().Contains(s)));
+            }
 
             return q.OrderByDescending(r => r.VisitDate).ToList();
         }
@@ -227,9 +236,12 @@ namespace MediCore.Services
                     : q.Where(c => c.Status == status);
 
             if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.ToLower();
                 q = q.Where(c =>
-                    c.Description.Contains(search) ||
-                    (c.Patient != null && c.Patient.FullName.Contains(search)));
+                    c.Description.ToLower().Contains(s) ||
+                    (c.Patient != null && c.Patient.FullName.ToLower().Contains(s)));
+            }
 
             return q.OrderByDescending(c => c.UpdatedAt).ToList();
         }
