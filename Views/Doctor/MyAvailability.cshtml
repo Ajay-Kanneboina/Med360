@@ -1,0 +1,57 @@
+@using MediCore.Models
+@model List<DoctorAvailability>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "My Availability";
+    string[] dayNames = ViewBag.DayNames as string[] ?? new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    var times = new[] { "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM" };
+}
+
+<p class="page-s">Set your weekly available hours</p>
+
+<form method="post" action="/Doctor/SaveAvailability">
+    @Html.AntiForgeryToken()
+    <div class="card mb-3">
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th class="ps-3">Day</th><th>Available</th><th>Start</th><th>End</th><th>Max Slots</th></tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var r = Model[i];
+                        <tr>
+                            <td class="ps-3 fw-semibold">@dayNames[i]</td>
+                            <td><input type="checkbox" name="available" value="true" @(r.IsAvailable ? "checked" : "") /></td>
+                            <td>
+                                <select name="startTimes" class="form-select form-select-sm" style="max-width:140px;">
+                                    @foreach (var t in times)
+                                    {
+                                        if (r.StartTime == t)
+                                        { <option value="@t" selected>@t</option> }
+                                        else
+                                        { <option value="@t">@t</option> }
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select name="endTimes" class="form-select form-select-sm" style="max-width:140px;">
+                                    @foreach (var t in times)
+                                    {
+                                        if (r.EndTime == t)
+                                        { <option value="@t" selected>@t</option> }
+                                        else
+                                        { <option value="@t">@t</option> }
+                                    }
+                                </select>
+                            </td>
+                            <td><input type="number" name="maxSlots" class="form-control form-control-sm" value="@r.MaxSlots" min="1" max="30" style="max-width:80px;" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save Availability</button>
+</form>

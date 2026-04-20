@@ -1,0 +1,58 @@
+@using MediCore.Models
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "My Appointments";
+    var appts = ViewBag.Appointments as List<Appointment> ?? new();
+    var today = DateTime.Today;
+}
+
+<p class="page-s">Your scheduled appointments</p>
+
+<div class="d-flex gap-2 mb-3">
+    @foreach (var tab in new[] { ("", "All"), ("Scheduled", "Scheduled"), ("Confirmed", "Confirmed"), ("Completed", "Completed") })
+    {
+        var isActive = (ViewBag.StatusFilter as string ?? "") == tab.Item1;
+        <a href="/Doctor/MyAppointments?status=@tab.Item1"
+           class="btn btn-sm @(isActive ? "btn-primary" : "btn-outline-secondary")">@tab.Item2</a>
+    }
+</div>
+
+@if (!appts.Any())
+{
+    <div class="card"><div class="card-body text-center text-muted py-5">No appointments.</div></div>
+}
+else
+{
+    @foreach (var a in appts)
+    {
+        var isToday = a.AppointmentDate.Date == today;
+        <div class="card mb-2">
+            <div class="card-body py-2 d-flex align-items-center gap-3">
+                <div class="text-center" style="min-width:50px;">
+                    <div style="font-size:1.4rem;font-weight:800;color:#1e2d45;">@a.AppointmentDate.Day</div>
+                    <div style="font-size:.65rem;color:#8faac4;font-weight:700;">@a.AppointmentDate.ToString("MMM")</div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">
+                        @a.Patient?.FullName
+                        @if (isToday) { <span class="pill pill-a">TODAY</span> }
+                    </div>
+                    <div class="text-muted small">
+                        <i class="bi bi-clock me-1"></i>@a.TimeSlot
+                        @if (a.Notes != null) { <span class="ms-2"><i class="bi bi-sticky me-1"></i>@a.Notes</span> }
+                    </div>
+                </div>
+                @{ var pc = a.Status == "Confirmed" ? "pill-d" : "pill-a"; }
+                <span class="pill @pc">@a.Status</span>
+                @if (a.Status == "Confirmed" || a.Status == "Scheduled")
+                {
+                    <form method="post" action="/Appointment/Complete">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@a.Id" />
+                        <button class="btn btn-sm btn-outline-success py-0" style="font-size:.75rem;">Done</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+}

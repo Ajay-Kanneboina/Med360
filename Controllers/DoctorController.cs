@@ -11,13 +11,15 @@ namespace MediCore.Controllers
     /// </summary>
     public class DoctorController : Controller
     {
-        private readonly IDoctorService _doctorService;
-        private readonly IAuditService  _audit;
+        private readonly IDoctorService      _doctorService;
+        private readonly IAuditService       _audit;
+        private readonly IAppointmentService _apptService;
 
-        public DoctorController(IDoctorService doctorService, IAuditService audit)
+        public DoctorController(IDoctorService doctorService, IAuditService audit, IAppointmentService apptService)
         {
             _doctorService = doctorService;
             _audit         = audit;
+            _apptService   = apptService;
         }
 
         // ── Auth guards ───────────────────────────────────────────────────
@@ -257,6 +259,56 @@ namespace MediCore.Controllers
 
             TempData["Success"] = "Response sent to patient.";
             return RedirectToAction(nameof(Complaints));
+        }
+
+        // ── My Appointments ───────────────────────────────────────────────
+        public IActionResult MyAppointments(string? status)
+        {
+            if (!IsStaff()) return RedirectToAction("Login", "Account");
+            SetSidebarBag();
+            int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            ViewBag.StatusFilter = status ?? "";
+            ViewBag.Appointments = _apptService.GetDoctorAppointments(userId, status);
+            return View();
+        }
+
+        public IActionResult MyAvailability()
+        {
+            if (!IsDoctor()) return RedirectToAction("Login", "Account");
+            SetSidebarBag();
+            int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            var existing = _apptService.GetDoctorAvailability(userId);
+            var days = new List<MediCore.Models.DoctorAvailability>();
+            for (int i = 0; i < 7; i++)
+            {
+                var found = existing.FirstOrDefault(e => e.DayOfWeek == i);
+                days.Add(found ?? new MediCore.Models.DoctorAvailability
+                { DoctorId = userId, DayOfWeek = i, StartTime = "09:00 AM", EndTime = "05:00 PM", MaxSlots = 10, IsAvailable = false });
+            }
+            ViewBag.DayNames = new[] { "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday" };
+            return View(days);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult SaveAvailability(bool[] available, string[] startTimes, string[] endTimes, int[] maxSlots)
+        {
+            if (!IsDoctor()) return RedirectToAction("Login", "Account");
+            int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            var slots = new List<MediCore.Models.DoctorAvailability>();
+            for (int i = 0; i < 7; i++)
+            {
+                slots.Add(new MediCore.Models.DoctorAvailability
+                {
+                    DoctorId = userId, DayOfWeek = i,
+                    IsAvailable = available.Length > i && available[i],
+                    StartTime = startTimes.Length > i ? startTimes[i] : "09:00 AM",
+                    EndTime = endTimes.Length > i ? endTimes[i] : "05:00 PM",
+                    MaxSlots = maxSlots.Length > i ? maxSlots[i] : 10
+                });
+            }
+            _apptService.SaveAvailability(userId, slots);
+            TempData["Success"] = "Availability saved!";
+            return RedirectToAction(nameof(MyAvailability));
         }
     }
 }

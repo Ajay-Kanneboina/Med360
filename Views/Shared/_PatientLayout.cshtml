@@ -236,6 +236,10 @@
                class="sb-link @(ppath.Contains("/Patient/MyComplaints") || ppath.Contains("/Patient/SubmitComplaint") || ppath.Contains("/Patient/EditComplaint") ? "sb-on" : "")">
                 <i class="bi bi-chat-square-text"></i> My Problems
             </a>
+            <a href="/Patient/MyAppointments"
+               class="sb-link @(ppath.Contains("/Patient/MyAppointments") || ppath.Contains("/Patient/BookAppointment") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> My Appointments
+            </a>
             <div class="sb-grp">Account</div>
             <a href="/Patient/MyProfile"
                class="sb-link @(ppath.Contains("/Patient/MyProfile") || ppath.Contains("/Patient/EditProfile") ? "sb-on" : "")">

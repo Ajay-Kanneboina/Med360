@@ -218,6 +218,13 @@
                 <i class="bi bi-chat-square-text"></i> Complaints
                 @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
             </a>
+            <div class="sb-grp">Appointments</div>
+            <a href="/Appointment/Index" class="sb-link @(upath=="/Appointment/Index" || upath=="/Appointment" ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> All Appointments
+            </a>
+            <a href="/Appointment/Book" class="sb-link @(upath.StartsWith("/Appointment/Book") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-plus"></i> Book Appointment
+            </a>
             <div class="sb-grp">Compliance</div>
             <a href="/Admin/AuditLog" class="sb-link @(upath.StartsWith("/Admin/AuditLog") ? "sb-on" : "")">
                 <i class="bi bi-shield-check"></i> Audit Log
@@ -235,6 +242,13 @@
             <div class="sb-grp">Patients</div>
             <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
                 <i class="bi bi-people"></i> All Patients
+            </a>
+            <div class="sb-grp">Appointments</div>
+            <a href="/Doctor/MyAppointments" class="sb-link @(upath.StartsWith("/Doctor/MyAppointments") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> My Appointments
+            </a>
+            <a href="/Doctor/MyAvailability" class="sb-link @(upath.StartsWith("/Doctor/MyAvailability") ? "sb-on" : "")">
+                <i class="bi bi-clock-history"></i> My Availability
             </a>
             <div class="sb-grp">Complaints</div>
             <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
@@ -254,6 +268,13 @@
             <div class="sb-grp">Patients</div>
             <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
                 <i class="bi bi-people"></i> All Patients
+            </a>
+            <div class="sb-grp">Appointments</div>
+            <a href="/Appointment/Index" class="sb-link @(upath=="/Appointment/Index" || upath=="/Appointment" ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> All Appointments
+            </a>
+            <a href="/Appointment/Book" class="sb-link @(upath.StartsWith("/Appointment/Book") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-plus"></i> Book Appointment
             </a>
             <div class="sb-grp">Complaints</div>
             <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
@@ -277,6 +298,13 @@
             <div class="sb-grp">Patients</div>
             <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
                 <i class="bi bi-people"></i> All Patients
+            </a>
+            <div class="sb-grp">Appointments</div>
+            <a href="/Appointment/Index" class="sb-link @(upath=="/Appointment/Index" || upath=="/Appointment" ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> All Appointments
+            </a>
+            <a href="/Appointment/Book" class="sb-link @(upath.StartsWith("/Appointment/Book") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-plus"></i> Book Appointment
             </a>
             <div class="sb-grp">Complaints</div>
             <a href="/Doctor/Complaints" class="sb-link @(upath == "/Doctor/Complaints" ? "sb-on" : "")">

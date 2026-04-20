@@ -7,11 +7,13 @@ namespace MediCore.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<User>      Users      { get; set; }
-        public DbSet<Patient>   Patients   { get; set; }
-        public DbSet<Complaint> Complaints { get; set; }
-        public DbSet<Record>    Records    { get; set; }
-        public DbSet<AuditLog>  AuditLogs  { get; set; }
+        public DbSet<User>               Users                { get; set; }
+        public DbSet<Patient>            Patients             { get; set; }
+        public DbSet<Complaint>          Complaints           { get; set; }
+        public DbSet<Record>             Records              { get; set; }
+        public DbSet<AuditLog>           AuditLogs            { get; set; }
+        public DbSet<Appointment>        Appointments         { get; set; }
+        public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder m)
         {
@@ -27,6 +29,24 @@ namespace MediCore.Data
                 .HasOne(r => r.Patient)
                 .WithMany(p => p.Records)
                 .HasForeignKey(r => r.PatientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.Entity<Appointment>()
+                .HasOne(a => a.Patient)
+                .WithMany()
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.Entity<Appointment>()
+                .HasOne(a => a.Doctor)
+                .WithMany()
+                .HasForeignKey(a => a.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.Entity<DoctorAvailability>()
+                .HasOne(d => d.Doctor)
+                .WithMany()
+                .HasForeignKey(d => d.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

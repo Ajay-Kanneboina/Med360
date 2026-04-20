@@ -22,13 +22,15 @@ namespace MediCore.Controllers
     /// </summary>
     public class PatientController : Controller
     {
-        private readonly IPatientService _patientService;
-        private readonly IAuditService   _audit;
+        private readonly IPatientService     _patientService;
+        private readonly IAuditService       _audit;
+        private readonly IAppointmentService _apptService;
 
-        public PatientController(IPatientService patientService, IAuditService audit)
+        public PatientController(IPatientService patientService, IAuditService audit, IAppointmentService apptService)
         {
             _patientService = patientService;
             _audit          = audit;
+            _apptService    = apptService;
         }
 
         // ── Auth helpers ──────────────────────────────────────────────────
@@ -243,6 +245,47 @@ namespace MediCore.Controllers
 
             TempData["Success"] = "Your profile has been updated.";
             return RedirectToAction(nameof(MyProfile));
+        }
+
+        // ── Appointments ──────────────────────────────────────────────────
+        public IActionResult MyAppointments()
+        {
+            if (!IsPatient()) return RedirectToAction("Login", "Account");
+            return View(_apptService.GetPatientAppointments(Pid()));
+        }
+
+        public IActionResult BookAppointment()
+        {
+            if (!IsPatient()) return RedirectToAction("Login", "Account");
+            ViewBag.Doctors = _apptService.GetAllDoctors();
+            return View();
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult BookAppointment(int doctorId, string appointmentDate, string timeSlot, string? notes)
+        {
+            if (!IsPatient()) return RedirectToAction("Login", "Account");
+            if (!DateTime.TryParse(appointmentDate, out var d))
+            { TempData["Error"] = "Invalid date."; return RedirectToAction(nameof(BookAppointment)); }
+            var r = _apptService.BookAppointment(Pid(), doctorId, d, timeSlot, notes);
+            if (r == null) { TempData["Error"] = "Slot taken."; return RedirectToAction(nameof(BookAppointment)); }
+            TempData["Success"] = "Appointment booked!";
+            return RedirectToAction(nameof(MyAppointments));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult CancelAppointment(int id, string reason)
+        {
+            if (!IsPatient()) return RedirectToAction("Login", "Account");
+            _apptService.CancelAppointment(id, reason ?? "Cancelled by patient");
+            TempData["Success"] = "Appointment cancelled.";
+            return RedirectToAction(nameof(MyAppointments));
+        }
+
+        public IActionResult GetSlots(int doctorId, string date)
+        {
+            if (!DateTime.TryParse(date, out var d)) return Json(new List<string>());
+            return Json(_apptService.GetAvailableSlots(doctorId, d));
         }
     }
 }

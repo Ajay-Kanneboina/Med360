@@ -14,10 +14,11 @@ builder.Services.AddControllersWithViews();
 // AddScoped: one instance per HTTP request — correct for services that use DbContext
 // The controller depends on the interface (IAdminService), not the concrete class.
 // This allows swapping implementations or mocking in unit tests without changing controllers.
-builder.Services.AddScoped<IAdminService,   AdminService>();
-builder.Services.AddScoped<IDoctorService,  DoctorService>();
-builder.Services.AddScoped<IPatientService, PatientService>();
-builder.Services.AddScoped<IAuditService,   AuditService>();
+builder.Services.AddScoped<IAdminService,       AdminService>();
+builder.Services.AddScoped<IDoctorService,      DoctorService>();
+builder.Services.AddScoped<IPatientService,     PatientService>();
+builder.Services.AddScoped<IAuditService,       AuditService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(o =>

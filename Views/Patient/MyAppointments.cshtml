@@ -1,0 +1,65 @@
+@using MediCore.Models
+@model List<Appointment>
+@{
+    ViewData["Title"] = "My Appointments";
+    Layout = "_PatientLayout";
+    var today = DateTime.Today;
+}
+
+<div style="background:linear-gradient(135deg,#1e2d45,#1a5276);border-radius:10px;padding:18px 22px;color:#fff;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+        <h5 style="margin:0;font-weight:700;font-size:1.05rem;"><i class="bi bi-calendar2-check me-2"></i>My Appointments</h5>
+        <p style="margin:3px 0 0;color:#a7c0dc;font-size:.82rem;">Your scheduled doctor visits</p>
+    </div>
+    <a href="/Patient/BookAppointment" class="btn btn-light btn-sm fw-bold"><i class="bi bi-plus-lg me-1"></i>Book New</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="bi bi-calendar-x" style="font-size:2rem;opacity:.3;"></i>
+            <p class="mt-2">No appointments yet.</p>
+            <a href="/Patient/BookAppointment" class="btn btn-primary btn-sm mt-1">Book Now</a>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var a in Model)
+    {
+        var isToday = a.AppointmentDate.Date == today;
+        var borderColor = a.Status == "Cancelled" ? "#ef4444" : a.Status == "Completed" ? "#0ea5e9" : "#22c55e";
+        var pillClass = a.Status == "Completed" ? "pill-r" : a.Status == "Cancelled" ? "pill-x" : "pill-d";
+
+        <div class="card mb-2" style="border-left:3px solid @borderColor;">
+            <div class="card-body py-2 d-flex align-items-center gap-3">
+                <div class="text-center" style="min-width:50px;">
+                    <div style="font-size:1.3rem;font-weight:800;color:#1e2d45;">@a.AppointmentDate.Day</div>
+                    <div style="font-size:.65rem;color:#8faac4;font-weight:700;">@a.AppointmentDate.ToString("MMM")</div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">
+                        Dr. @a.Doctor?.FullName
+                        @if (isToday) { <span class="pill pill-a">TODAY</span> }
+                    </div>
+                    <div class="text-muted small">
+                        <i class="bi bi-clock me-1"></i>@a.TimeSlot
+                        @if (a.Notes != null) { <span class="ms-2">@a.Notes</span> }
+                    </div>
+                    @if (a.CancelReason != null) { <div class="text-danger small mt-1">@a.CancelReason</div> }
+                </div>
+                <span class="pill @pillClass">@a.Status</span>
+                @if (a.Status != "Cancelled" && a.Status != "Completed")
+                {
+                    <form method="post" action="/Patient/CancelAppointment">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@a.Id" />
+                        <input type="hidden" name="reason" value="Cancelled by patient" />
+                        <button class="btn btn-sm btn-outline-danger py-0" style="font-size:.75rem;">Cancel</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+}
