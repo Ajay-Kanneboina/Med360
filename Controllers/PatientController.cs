@@ -4,22 +4,6 @@ using MediCore.Services;
 
 namespace MediCore.Controllers
 {
-    /// <summary>
-    /// PatientController — thin HTTP adapter for the patient portal.
-    ///
-    /// RESPONSIBILITIES (what this controller does):
-    ///   1. Verify session role is Patient (auth guard)
-    ///   2. Read PatientId from session
-    ///   3. Call the appropriate IPatientService method
-    ///   4. Map results to ViewBag / Model and return View or Redirect
-    ///
-    /// NOT RESPONSIBLE FOR (all moved to PatientService):
-    ///   • Setting default Status = "Active" on new complaints
-    ///   • Setting IsRead = false on create/edit
-    ///   • Setting SubmittedAt / UpdatedAt timestamps
-    ///   • Filtering records by status or keyword
-    ///   • Ownership checks (patient can only see their own records)
-    /// </summary>
     public class PatientController : Controller
     {
         private readonly IPatientService     _patientService;
@@ -33,32 +17,17 @@ namespace MediCore.Controllers
             _apptService    = apptService;
         }
 
-        // ── Auth helpers ──────────────────────────────────────────────────
-
-        /// <summary>Returns true only if the current session role is Patient.</summary>
         private bool IsPatient() =>
             HttpContext.Session.GetString("UserRole") == "Patient";
 
-        /// <summary>
-        /// Returns the PatientId from the session (set at login).
-        /// Returns 0 if missing — treated as unlinked account by the service.
-        /// </summary>
         private int Pid() => HttpContext.Session.GetInt32("PatientId") ?? 0;
 
-        // ── Dashboard ─────────────────────────────────────────────────────
-
-        /// <summary>
-        /// GET /Patient/Dashboard
-        /// Lightweight landing page — just the patient identity for the hero
-        /// card and quick-action tiles. All detail views (records, complaints,
-        /// profile) load their own data on their own pages.
-        /// </summary>
         public IActionResult Dashboard()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
             int pid = Pid();
-            if (pid == 0) return View("NoRecord"); // unlinked account
+            if (pid == 0) return View("NoRecord");
 
             var patient = _patientService.GetMyProfile(pid);
             if (patient == null) return View("NoRecord");
@@ -66,12 +35,6 @@ namespace MediCore.Controllers
             return View(patient);
         }
 
-        // ── My Medical Records ────────────────────────────────────────────
-
-        /// <summary>
-        /// GET /Patient/MyRecords?status=…&search=…
-        /// Service handles filtering and ownership — controller passes parameters through.
-        /// </summary>
         public IActionResult MyRecords(string? status, string? search)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
@@ -79,7 +42,6 @@ namespace MediCore.Controllers
             ViewBag.StatusFilter = status ?? "";
             ViewBag.SearchFilter = search ?? "";
 
-            // Record summary counts for the summary pills at top of page
             var recordStats = _patientService.GetRecordStats(Pid());
             ViewBag.TotalRecords = recordStats.Total;
             ViewBag.ActiveCount  = recordStats.Active;
@@ -88,28 +50,16 @@ namespace MediCore.Controllers
             return View(_patientService.GetMyRecords(Pid(), status, search));
         }
 
-        /// <summary>
-        /// GET /Patient/RecordDetail/{id}
-        /// Service performs the ownership check — returns null if mismatch.
-        /// Controller returns 404 without exposing why (security by obscurity).
-        /// </summary>
         public IActionResult RecordDetail(int id)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
-            // Service verifies this record belongs to this patient
             var record = _patientService.GetMyRecord(id, Pid());
             if (record == null) return NotFound();
 
             return View(record);
         }
 
-        // ── Complaints ────────────────────────────────────────────────────
-
-        /// <summary>
-        /// GET /Patient/MyComplaints
-        /// Service returns complaints ordered by newest first.
-        /// </summary>
         public IActionResult MyComplaints()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
@@ -117,27 +67,17 @@ namespace MediCore.Controllers
             return View(_patientService.GetMyComplaints(Pid()));
         }
 
-        /// <summary>
-        /// GET /Patient/SubmitComplaint
-        /// Renders the blank complaint submission form.
-        /// </summary>
         public IActionResult SubmitComplaint()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
             return View();
         }
 
-        /// <summary>
-        /// POST /Patient/SubmitComplaint
-        /// Validates input and delegates creation to the service.
-        /// Service sets Status, IsRead, and timestamps — not this controller.
-        /// </summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult SubmitComplaint(string description, string? additionalNotes)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
-            // Minimal input validation — description must not be empty
             if (string.IsNullOrWhiteSpace(description))
             {
                 ViewBag.Error = "Please describe your problem.";
@@ -154,23 +94,12 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(MyComplaints));
         }
 
-        /// <summary>
-        /// GET /Patient/EditComplaint/{id}
-        /// Deprecated — editing now happens inline on MyComplaints. Redirect
-        /// any stale links back to the list.
-        /// </summary>
         public IActionResult EditComplaint(int id)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
             return RedirectToAction(nameof(MyComplaints));
         }
 
-        /// <summary>
-        /// POST /Patient/EditComplaint/{id}
-        /// Passes updated text to the service.
-        /// Service resets IsRead = false to re-notify the doctor — controller
-        /// does NOT set IsRead directly.
-        /// </summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult EditComplaint(int id, string description, string? additionalNotes)
         {
@@ -192,13 +121,6 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(MyComplaints));
         }
 
-        // ── Profile ───────────────────────────────────────────────────────
-
-        /// <summary>
-        /// GET /Patient/MyProfile
-        /// Read-only view of patient demographics and medical history.
-        /// Editable contact fields have an Edit button linking to EditProfile.
-        /// </summary>
         public IActionResult MyProfile()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
@@ -209,23 +131,12 @@ namespace MediCore.Controllers
             return View(patient);
         }
 
-        /// <summary>
-        /// GET /Patient/EditProfile
-        /// Deprecated — editing now happens inline on MyProfile. Redirect any
-        /// stale links here so the user lands on the right page.
-        /// </summary>
         public IActionResult EditProfile()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
             return RedirectToAction(nameof(MyProfile));
         }
 
-        /// <summary>
-        /// POST /Patient/EditProfile
-        /// Accepts all patient-editable fields: contact info plus clinical info
-        /// (DOB, gender, blood group, medical history). FullName is not posted
-        /// and is not changed here.
-        /// </summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult EditProfile(string?   phone,
                                          string?   email,
@@ -247,45 +158,39 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(MyProfile));
         }
 
-        // ── Appointments ──────────────────────────────────────────────────
         public IActionResult MyAppointments()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
             return View(_apptService.GetPatientAppointments(Pid()));
         }
 
-        public IActionResult BookAppointment()
+        public IActionResult SendAppointmentRequest()
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
-            ViewBag.Doctors = _apptService.GetAllDoctors();
+            ViewBag.PastRequests = _apptService.GetPatientRequests(Pid());
             return View();
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult BookAppointment(int doctorId, string appointmentDate, string timeSlot, string? notes)
+        public IActionResult SendAppointmentRequest(string message, string? preferredDate, string? preferredTime)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
-            if (!DateTime.TryParse(appointmentDate, out var d))
-            { TempData["Error"] = "Invalid date."; return RedirectToAction(nameof(BookAppointment)); }
-            var r = _apptService.BookAppointment(Pid(), doctorId, d, timeSlot, notes);
-            if (r == null) { TempData["Error"] = "Slot taken."; return RedirectToAction(nameof(BookAppointment)); }
-            TempData["Success"] = "Appointment booked!";
-            return RedirectToAction(nameof(MyAppointments));
-        }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult CancelAppointment(int id, string reason)
-        {
-            if (!IsPatient()) return RedirectToAction("Login", "Account");
-            _apptService.CancelAppointment(id, reason ?? "Cancelled by patient");
-            TempData["Success"] = "Appointment cancelled.";
-            return RedirectToAction(nameof(MyAppointments));
-        }
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                ViewBag.Error        = "Please describe what kind of appointment you need.";
+                ViewBag.PastRequests = _apptService.GetPatientRequests(Pid());
+                return View();
+            }
 
-        public IActionResult GetSlots(int doctorId, string date)
-        {
-            if (!DateTime.TryParse(date, out var d)) return Json(new List<string>());
-            return Json(_apptService.GetAvailableSlots(doctorId, d));
+            _apptService.SendRequest(Pid(), message, preferredDate, preferredTime);
+
+            var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
+            _audit.Log(patientName, "Appointment Requested", message.Length > 60 ? message[..60] + "…" : message,
+                       "Appointment", HttpContext.Session.GetInt32("UserId"));
+
+            TempData["Success"] = "Your request has been sent to the receptionist. They will book your appointment shortly.";
+            return RedirectToAction(nameof(MyAppointments));
         }
     }
 }

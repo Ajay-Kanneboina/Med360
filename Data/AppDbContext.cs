@@ -14,6 +14,7 @@ namespace MediCore.Data
         public DbSet<AuditLog>           AuditLogs            { get; set; }
         public DbSet<Appointment>        Appointments         { get; set; }
         public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; }
+        public DbSet<AppointmentRequest> AppointmentRequests  { get; set; }
 
         protected override void OnModelCreating(ModelBuilder m)
         {
@@ -47,6 +48,12 @@ namespace MediCore.Data
                 .HasOne(d => d.Doctor)
                 .WithMany()
                 .HasForeignKey(d => d.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.Entity<AppointmentRequest>()
+                .HasOne(r => r.Patient)
+                .WithMany()
+                .HasForeignKey(r => r.PatientId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

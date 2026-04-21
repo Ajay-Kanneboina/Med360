@@ -1,0 +1,105 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Book Appointment";
+    var patients  = ViewBag.Patients  as List<MediCore.Models.Patient> ?? new();
+    var doctors   = ViewBag.Doctors   as List<MediCore.Models.User>    ?? new();
+    var requestId = ViewBag.RequestId as int?;
+    var selPat    = ViewBag.SelectedPatient as int?;
+}
+
+<p class="page-s">Book an appointment for a patient with a doctor.</p>
+
+<div class="sbox" style="max-width:640px;">
+    <div class="slabel">Appointment Details</div>
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+
+        @if (requestId.HasValue)
+        {
+            <input type="hidden" name="requestId" value="@requestId" />
+            <div class="alert mb-3" style="background:#f0fdf4;color:#166534;border-radius:8px;font-size:.84rem;">
+                <i class="bi bi-info-circle me-1"></i>
+                Booking from a patient request — mark it as handled automatically after booking.
+            </div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label">Patient <span class="text-danger">*</span></label>
+            <select name="patientId" class="form-select" required>
+                <option value="">— Select patient —</option>
+                @foreach (var p in patients)
+                {
+                    if (selPat == p.Id)
+                    { <option value="@p.Id" selected>@p.FullName</option> }
+                    else
+                    { <option value="@p.Id">@p.FullName</option> }
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Doctor <span class="text-danger">*</span></label>
+            <select name="doctorId" id="doctorSelect" class="form-select" required>
+                <option value="">— Select doctor —</option>
+                @foreach (var d in doctors)
+                {
+                    <option value="@d.Id">Dr. @d.FullName</option>
+                }
+            </select>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+                <label class="form-label">Date <span class="text-danger">*</span></label>
+                <input type="date" name="appointmentDate" id="apptDate" class="form-control" required
+                       min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label">Time Slot <span class="text-danger">*</span></label>
+                <select name="timeSlot" id="slotSelect" class="form-select" required>
+                    <option value="">— Select date & doctor first —</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Notes <span class="stat-l">(optional)</span></label>
+            <textarea name="notes" class="form-control" rows="2"
+                      placeholder="Any special notes for this appointment…"></textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-calendar-check me-1"></i>Book Appointment
+            </button>
+            <a href="/Receptionist/Appointments" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const doctorSel = document.getElementById('doctorSelect');
+    const dateSel   = document.getElementById('apptDate');
+    const slotSel   = document.getElementById('slotSelect');
+
+    async function loadSlots() {
+        const doctorId = doctorSel.value;
+        const date     = dateSel.value;
+        if (!doctorId || !date) return;
+
+        slotSel.innerHTML = '<option>Loading…</option>';
+        const res   = await fetch(`/Receptionist/GetSlots?doctorId=${doctorId}&date=${date}`);
+        const slots = await res.json();
+
+        if (slots.length === 0) {
+            slotSel.innerHTML = '<option value="">No slots available</option>';
+        } else {
+            slotSel.innerHTML = '<option value="">— Choose a slot —</option>' +
+                slots.map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+    }
+
+    doctorSel.addEventListener('change', loadSlots);
+    dateSel.addEventListener('change', loadSlots);
+</script>

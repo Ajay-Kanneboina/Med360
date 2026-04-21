@@ -15,13 +15,10 @@ namespace MediCore.Controllers
         private bool IsNurse() =>
             HttpContext.Session.GetString("UserRole") == "Nurse";
 
-        // ── Dashboard ─────────────────────────────────────────────────────
-
         public IActionResult Dashboard()
         {
             if (!IsNurse()) return RedirectToAction("Login", "Account");
 
-            // Reuse existing DoctorService — no new logic needed
             var stats = _doctorService.GetDashboardStats();
             ViewBag.TotalPatients    = stats.TotalPatients;
             ViewBag.TotalRecords     = stats.TotalRecords;

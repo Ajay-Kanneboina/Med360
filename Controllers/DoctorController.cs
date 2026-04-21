@@ -4,11 +4,6 @@ using MediCore.Models;
 
 namespace MediCore.Controllers
 {
-    /// <summary>
-    /// DoctorController — thin HTTP adapter for all doctor/clinical views.
-    /// Accessible by Doctor, Admin, Nurse, and Receptionist roles.
-    /// Delegates all business logic to IDoctorService.
-    /// </summary>
     public class DoctorController : Controller
     {
         private readonly IDoctorService      _doctorService;
@@ -22,12 +17,6 @@ namespace MediCore.Controllers
             _apptService   = apptService;
         }
 
-        // ── Auth guards ───────────────────────────────────────────────────
-
-        /// <summary>
-        /// Returns true for Doctor, Admin, Nurse, Receptionist.
-        /// All staff roles can access the doctor-facing views.
-        /// </summary>
         private bool IsStaff()
         {
             var role = HttpContext.Session.GetString("UserRole");
@@ -35,32 +24,19 @@ namespace MediCore.Controllers
                    role == "Nurse" || role == "Receptionist";
         }
 
-        /// <summary>
-        /// Returns true only for Doctor and Admin.
-        /// Only these roles can add/edit medical records.
-        /// </summary>
         private bool IsDoctor()
         {
             var role = HttpContext.Session.GetString("UserRole");
             return role == "Doctor" || role == "Admin";
         }
 
-        /// <summary>Populates sidebar unread complaint count.</summary>
         private void SetSidebarBag()
         {
             ViewBag.NewComplaints = _doctorService.GetUnreadCount();
         }
 
-        // ── Dashboard ─────────────────────────────────────────────────────
-
-        /// <summary>
-        /// GET /Doctor/Dashboard
-        /// Main landing page for all staff roles.
-        /// Shows KPI cards, recent complaints, recent records, priority patients.
-        /// </summary>
         public IActionResult Dashboard()
         {
-            // FIX: Use IsStaff() so Nurse/Receptionist can also see the dashboard
             if (!IsStaff()) return RedirectToAction("Login", "Account");
             SetSidebarBag();
 
@@ -77,9 +53,6 @@ namespace MediCore.Controllers
             return View();
         }
 
-        // ── Patient List ──────────────────────────────────────────────────
-
-        /// <summary>GET /Doctor/Patients — all patients with search and filter.</summary>
         public IActionResult Patients(string? search, string? gender, string? blood)
         {
             if (!IsStaff()) return RedirectToAction("Login", "Account");
@@ -93,9 +66,6 @@ namespace MediCore.Controllers
             return View(_doctorService.GetPatients(search, gender, blood));
         }
 
-        // ── Patient Detail ────────────────────────────────────────────────
-
-        /// <summary>GET /Doctor/PatientDetail/{id} — full patient profile.</summary>
         public IActionResult PatientDetail(int id)
         {
             if (!IsStaff()) return RedirectToAction("Login", "Account");
@@ -111,9 +81,6 @@ namespace MediCore.Controllers
             return View(patient);
         }
 
-        // ── Add Record ────────────────────────────────────────────────────
-
-        /// <summary>GET /Doctor/AddRecord/{patientId} — blank add record form.</summary>
         public IActionResult AddRecord(int patientId)
         {
             if (!IsDoctor()) return RedirectToAction("Login", "Account");
@@ -127,10 +94,6 @@ namespace MediCore.Controllers
             return View();
         }
 
-        /// <summary>
-        /// POST /Doctor/AddRecord — saves new record.
-        /// DoctorName stamped from session and passed to service.
-        /// </summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult AddRecord(int patientId, string diagnosis,
                                        string treatment, string? notes,
@@ -156,9 +119,6 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(PatientDetail), new { id = patientId });
         }
 
-        // ── Edit Record ───────────────────────────────────────────────────
-
-        /// <summary>GET /Doctor/EditRecord/{id} — pre-filled edit form.</summary>
         public IActionResult EditRecord(int id)
         {
             if (!IsDoctor()) return RedirectToAction("Login", "Account");
@@ -171,7 +131,6 @@ namespace MediCore.Controllers
             return View(record);
         }
 
-        /// <summary>POST /Doctor/EditRecord/{id} — updates clinical fields only.</summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult EditRecord(int id, string diagnosis, string treatment,
                                         string? notes, DateTime visitDate, string status)
@@ -197,9 +156,6 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(PatientDetail), new { id = updated?.PatientId });
         }
 
-        // ── Close Record ──────────────────────────────────────────────────
-
-        /// <summary>POST /Doctor/CloseRecord/{id} — soft-archives a record.</summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult CloseRecord(int id)
         {
@@ -218,9 +174,6 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(PatientDetail), new { id = patientId });
         }
 
-        // ── Complaints ────────────────────────────────────────────────────
-
-        /// <summary>GET /Doctor/Complaints?filter=… — all complaints with filter.</summary>
         public IActionResult Complaints(string? filter)
         {
             if (!IsStaff()) return RedirectToAction("Login", "Account");
@@ -232,7 +185,6 @@ namespace MediCore.Controllers
             return View(_doctorService.GetComplaints(filter));
         }
 
-        /// <summary>GET /Doctor/ViewComplaint/{id} — view and auto-mark as read.</summary>
         public IActionResult ViewComplaint(int id)
         {
             if (!IsStaff()) return RedirectToAction("Login", "Account");
@@ -244,7 +196,6 @@ namespace MediCore.Controllers
             return View(complaint);
         }
 
-        /// <summary>POST /Doctor/Respond — saves doctor response, stamps from session.</summary>
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult Respond(int id, string response, string status)
         {
@@ -261,7 +212,6 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(Complaints));
         }
 
-        // ── My Appointments ───────────────────────────────────────────────
         public IActionResult MyAppointments(string? status)
         {
             if (!IsStaff()) return RedirectToAction("Login", "Account");

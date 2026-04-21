@@ -1,7 +1,3 @@
-@*
-    _PatientLayout.cshtml — patient portal layout with sidebar UI that matches
-    the admin/doctor layout structure. All styles inlined; no external CSS.
-*@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +15,6 @@
             margin: 0;
         }
 
-        /* Sidebar — teal theme */
         .sidebar {
             width: 220px;
             background: #134e4a;
@@ -70,7 +65,6 @@
         .sb-user { color: #99d6d1; font-size: .79rem; margin-bottom: 8px; }
         .sb-user strong { color: #fff; display: block; }
 
-        /* Topbar */
         .topbar {
             position: fixed;
             left: 220px; right: 0; top: 0;
@@ -83,15 +77,12 @@
             z-index: 10;
         }
 
-        /* Main content area */
         .main    { margin-left: 220px; padding-top: 52px; min-height: 100vh; }
         .content { padding: 24px; }
 
-        /* Page headings */
         .page-h { font-size: 1.1rem; font-weight: 700; color: #134e4a; margin-bottom: 2px; }
         .page-s { font-size: .81rem; color: #6b9e99; margin-bottom: 18px; }
 
-        /* Cards */
         .card        { border: none; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
         .card-header {
             background: #fff;
@@ -102,12 +93,10 @@
             padding: 11px 16px;
         }
 
-        /* Stat boxes */
         .stat   { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
         .stat-n { font-size: 1.6rem; font-weight: 700; color: #134e4a; }
         .stat-l { font-size: .77rem; color: #6b9e99; }
 
-        /* Stat tiles */
         .tile {
             background: #fff;
             border-radius: 10px;
@@ -129,7 +118,6 @@
         .tile-n { font-size: 1.5rem; font-weight: 700; color: #134e4a; line-height: 1; }
         .tile-l { font-size: .77rem; color: #6b9e99; margin-top: 2px; }
 
-        /* Info boxes */
         .sbox   { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 16px; }
         .slabel {
             font-size: .68rem;
@@ -142,13 +130,11 @@
             margin-bottom: 14px;
         }
 
-        /* Tables */
         .table { font-size: .86rem; }
         .table thead th { background: #f0fdfa; color: #0f766e; font-weight: 600; border-bottom: 2px solid #ccfbf1; }
         .table td { border-bottom: 1px solid #f0fdf9; vertical-align: middle; }
         .table tr:last-child td { border-bottom: none; }
 
-        /* Info rows */
         .irow {
             display: flex;
             justify-content: space-between;
@@ -159,14 +145,12 @@
         .irow:last-child { border-bottom: none; }
         .ilbl { color: #6b9e99; font-weight: 600; }
 
-        /* Pills */
         .pill   { border-radius: 20px; padding: 2px 10px; font-size: .74rem; font-weight: 600; }
         .pill-a { background: #fef9c3; color: #854d0e; }
         .pill-r { background: #ccfbf1; color: #0f766e; }
         .pill-d { background: #dcfce7; color: #166534; }
         .pill-x { background: #f1f5f9; color: #475569; }
 
-        /* Response box */
         .resp-box {
             background: #f0fdfa;
             border: 1px solid #99f6e4;
@@ -175,7 +159,6 @@
             font-size: .88rem;
         }
 
-        /* Forms */
         .form-label { font-weight: 600; font-size: .79rem; color: #374151; margin-bottom: 4px; }
         .form-control, .form-select {
             border: 1px solid #99f6e4;
@@ -188,7 +171,6 @@
             outline: none;
         }
 
-        /* Patient action button */
         .btn-g {
             background: #0f766e;
             color: #fff;
@@ -204,7 +186,6 @@
         }
         .btn-g:hover { background: #0d6b63; color: #fff; }
 
-        /* Alerts */
         .alert { border: none; border-radius: 8px; font-size: .86rem; }
     </style>
 </head>
@@ -219,7 +200,7 @@
 {
     <aside class="sidebar">
         <div class="sb-logo">
-            <img src="/images/logo.svg" width="26" height="26" style="border-radius:50%;" /> MediCore360
+            <img src="/images/logo.svg" width="34" height="34" style="border-radius:50%;flex-shrink:0;" onerror="this.style.display='none'" /> MediCore360
         </div>
         <nav style="flex:1;padding:8px 0;overflow-y:auto;">
             <div class="sb-grp">Overview</div>
@@ -237,8 +218,12 @@
                 <i class="bi bi-chat-square-text"></i> My Problems
             </a>
             <a href="/Patient/MyAppointments"
-               class="sb-link @(ppath.Contains("/Patient/MyAppointments") || ppath.Contains("/Patient/BookAppointment") ? "sb-on" : "")">
+               class="sb-link @(ppath.Contains("/Patient/MyAppointments") ? "sb-on" : "")">
                 <i class="bi bi-calendar2-check"></i> My Appointments
+            </a>
+            <a href="/Patient/SendAppointmentRequest"
+               class="sb-link @(ppath.Contains("/Patient/SendAppointmentRequest") ? "sb-on" : "")">
+                <i class="bi bi-calendar-plus"></i> Request Appointment
             </a>
             <div class="sb-grp">Account</div>
             <a href="/Patient/MyProfile"

@@ -48,7 +48,6 @@ else
                     }
                 </div>
 
-                @* ── View mode ───────────────────────────────── *@
                 <div class="js-view">
                     <p class="fw-semibold mb-1" style="font-size:.9rem;">@c.Description</p>
                     @if (!string.IsNullOrEmpty(c.AdditionalNotes))
@@ -57,7 +56,6 @@ else
                     }
                 </div>
 
-                @* ── Edit mode (hidden until Edit clicked) ──── *@
                 @if (c.Status == "Active")
                 {
                     <form method="post" action="/Patient/EditComplaint/@c.Id" class="js-edit" style="display:none;">
@@ -80,7 +78,6 @@ else
                     </form>
                 }
 
-                @* ── Doctor response (always visible below) ── *@
                 @if (!string.IsNullOrEmpty(c.DoctorResponse))
                 {
                     <div class="resp-box mt-3">
@@ -97,7 +94,6 @@ else
 }
 
 <script>
-    // Per-card inline edit toggle — no page navigation required.
     document.querySelectorAll('[data-complaint]').forEach(card => {
         const toggle = card.querySelector('.js-edit-toggle');
         const cancel = card.querySelector('.js-edit-cancel');
@@ -111,7 +107,6 @@ else
             toggle.style.display = 'none';
         });
         cancel?.addEventListener('click', () => {
-            // Discard unsaved changes — reload resets the textareas.
             location.reload();
         });
     });

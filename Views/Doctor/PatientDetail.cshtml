@@ -10,17 +10,12 @@
 
 <p class="page-s">Patient profile, medical history, records and complaints.</p>
 
-@* Action buttons *@
 <div class="d-flex gap-2 mb-3 flex-wrap">
-    <a href="/Doctor/AddRecord/@Model.Id" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>Add Record
-    </a>
     <a href="/Doctor/Patients" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Back to Patients
     </a>
 </div>
 
-@* KPI mini-tiles *@
 <div class="row g-2 mb-3">
     <div class="col-4"><div class="stat"><div class="stat-n" style="color:#166534;">@activeRec</div><div class="stat-l">Active Records</div></div></div>
     <div class="col-4"><div class="stat"><div class="stat-n" style="color:#475569;">@closedRec</div><div class="stat-l">Archived</div></div></div>
@@ -28,7 +23,6 @@
 </div>
 
 <div class="row g-3 mb-3">
-    @* Demographics *@
     <div class="col-lg-4">
         <div class="sbox">
             <div class="slabel">Demographics</div>
@@ -66,22 +60,17 @@
         </div>
     </div>
 
-    @* Records + Complaints *@
     <div class="col-lg-8">
-        @* Medical Records *@
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-file-medical me-2 text-primary"></i>Medical Records
                     <span class="badge bg-primary ms-1">@Model.Records.Count</span>
                 </span>
-                <a href="/Doctor/AddRecord/@Model.Id" class="btn btn-sm btn-outline-primary" style="font-size:.78rem;">
-                    <i class="bi bi-plus-lg me-1"></i>Add
-                </a>
             </div>
             <div class="card-body p-0">
                 @if (!Model.Records.Any())
                 {
-                    <div class="text-center py-4 stat-l">No records yet — click Add to create the first one.</div>
+                    <div class="text-center py-4 stat-l">No records available for this patient.</div>
                 }
                 else
                 {
@@ -120,7 +109,6 @@
             </div>
         </div>
 
-        @* Complaints *@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-chat-square-text me-2 text-warning"></i>Complaints

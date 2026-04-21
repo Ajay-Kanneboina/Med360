@@ -83,7 +83,6 @@ namespace MediCore.Controllers
             if (_db.Users.Any(u => u.Email == email))
             { ViewBag.Error = "Email already registered."; return View(); }
 
-            // Prevent self-registration as Admin — admin accounts must be created/approved by an existing admin
             if (role == "Admin")
             {
                 ViewBag.Error = "Cannot register as Admin. An administrator must create admin accounts.";
@@ -107,7 +106,6 @@ namespace MediCore.Controllers
                 }
             }
 
-            // Users who request staff roles must be approved by an admin before they can login
             var isStaffRole = role == "Doctor" || role == "Nurse" || role == "Receptionist";
 
             _db.Users.Add(new User
@@ -118,7 +116,7 @@ namespace MediCore.Controllers
                 Role         = role,
                 Phone        = phone,
                 PatientId    = patientId,
-                IsActive     = !isStaffRole // staff roles are inactive until approved by admin
+                IsActive     = !isStaffRole
             });
             _db.SaveChanges();
 
@@ -128,7 +126,6 @@ namespace MediCore.Controllers
 
             if (isStaffRole)
             {
-                // Inform user that admin approval is required
                 TempData["Info"] = "Your account request has been received. An administrator must approve your account before you can sign in.";
             }
             else

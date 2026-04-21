@@ -1,0 +1,89 @@
+@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Request Appointment";
+    var pastRequests = ViewBag.PastRequests as List<MediCore.Models.AppointmentRequest> ?? new();
+}
+
+<p class="page-s">Send a message to the receptionist and they will book your appointment with a doctor.</p>
+
+<div class="sbox mb-4">
+    <div class="slabel">New Appointment Request</div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert mb-3" style="background:#fef2f2;color:#991b1b;">
+            <i class="bi bi-exclamation-circle me-2"></i>@ViewBag.Error
+        </div>
+    }
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label">What do you need? <span class="text-danger">*</span></label>
+            <textarea name="message" class="form-control" rows="4" required
+                      placeholder="e.g. I have been having severe back pain for 3 days and need to see a doctor as soon as possible."></textarea>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+                <label class="form-label">Preferred Date <span class="stat-l">(optional)</span></label>
+                <input type="text" name="preferredDate" class="form-control"
+                       placeholder="e.g. Monday, or 25 April" />
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label">Preferred Time <span class="stat-l">(optional)</span></label>
+                <input type="text" name="preferredTime" class="form-control"
+                       placeholder="e.g. Morning, or after 2 PM" />
+            </div>
+        </div>
+        <button type="submit" class="btn-g">
+            <i class="bi bi-send me-2"></i>Send Request to Receptionist
+        </button>
+    </form>
+</div>
+
+@if (pastRequests.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-clock-history me-2" style="color:#0f766e;"></i>My Past Requests
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Message</th>
+                        <th>Preferred Date</th>
+                        <th>Preferred Time</th>
+                        <th>Sent On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in pastRequests)
+                {
+                    <tr>
+                        <td style="max-width:260px;">
+                            <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;">
+                                @r.Message
+                            </div>
+                        </td>
+                        <td class="stat-l">@(r.PreferredDate ?? "—")</td>
+                        <td class="stat-l">@(r.PreferredTime ?? "—")</td>
+                        <td class="stat-l">@r.SentAt.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (r.IsHandled)
+                            {
+                                <span class="pill pill-d"><i class="bi bi-check-circle me-1"></i>Handled</span>
+                            }
+                            else
+                            {
+                                <span class="pill pill-a"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

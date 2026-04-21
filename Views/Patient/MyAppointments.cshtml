@@ -6,12 +6,14 @@
     var today = DateTime.Today;
 }
 
-<div style="background:linear-gradient(135deg,#1e2d45,#1a5276);border-radius:10px;padding:18px 22px;color:#fff;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+<div style="background:linear-gradient(135deg,#0d4a45,#0f766e);border-radius:10px;padding:18px 22px;color:#fff;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
     <div>
         <h5 style="margin:0;font-weight:700;font-size:1.05rem;"><i class="bi bi-calendar2-check me-2"></i>My Appointments</h5>
-        <p style="margin:3px 0 0;color:#a7c0dc;font-size:.82rem;">Your scheduled doctor visits</p>
+        <p style="margin:3px 0 0;color:#a7c0dc;font-size:.82rem;">Appointments booked for you by the receptionist</p>
     </div>
-    <a href="/Patient/BookAppointment" class="btn btn-light btn-sm fw-bold"><i class="bi bi-plus-lg me-1"></i>Book New</a>
+    <a href="/Patient/SendAppointmentRequest" class="btn btn-light btn-sm fw-bold">
+        <i class="bi bi-calendar-plus me-1"></i>Request Appointment
+    </a>
 </div>
 
 @if (!Model.Any())
@@ -19,8 +21,10 @@
     <div class="card">
         <div class="card-body text-center py-5 text-muted">
             <i class="bi bi-calendar-x" style="font-size:2rem;opacity:.3;"></i>
-            <p class="mt-2">No appointments yet.</p>
-            <a href="/Patient/BookAppointment" class="btn btn-primary btn-sm mt-1">Book Now</a>
+            <p class="mt-2">No appointments yet. Send a request to the receptionist to book one for you.</p>
+            <a href="/Patient/SendAppointmentRequest" class="btn btn-primary btn-sm mt-1">
+                <i class="bi bi-calendar-plus me-1"></i>Request Appointment
+            </a>
         </div>
     </div>
 }
@@ -50,15 +54,6 @@ else
                     @if (a.CancelReason != null) { <div class="text-danger small mt-1">@a.CancelReason</div> }
                 </div>
                 <span class="pill @pillClass">@a.Status</span>
-                @if (a.Status != "Cancelled" && a.Status != "Completed")
-                {
-                    <form method="post" action="/Patient/CancelAppointment">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@a.Id" />
-                        <input type="hidden" name="reason" value="Cancelled by patient" />
-                        <button class="btn btn-sm btn-outline-danger py-0" style="font-size:.75rem;">Cancel</button>
-                    </form>
-                }
             </div>
         </div>
     }

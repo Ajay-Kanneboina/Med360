@@ -20,7 +20,6 @@
 
 <p class="page-s">Key performance indicators and operational health of MediCore360.</p>
 
-@* Top KPIs *@
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3"><div class="stat"><div class="stat-n text-primary">@totalPatients</div><div class="stat-l">Total Patients</div></div></div>
     <div class="col-6 col-md-3"><div class="stat"><div class="stat-n" style="color:#0f766e;">@totalRecords</div><div class="stat-l">Medical Records</div></div></div>
@@ -29,7 +28,6 @@
 </div>
 
 <div class="row g-3 mb-4">
-    @* Gender distribution *@
     <div class="col-md-4">
         <div class="sbox h-100">
             <div class="slabel">Patient Gender Distribution</div>
@@ -49,7 +47,6 @@
         </div>
     </div>
 
-    @* Complaint Status *@
     <div class="col-md-4">
         <div class="sbox h-100">
             <div class="slabel">Complaint Breakdown</div>
@@ -87,7 +84,6 @@
         </div>
     </div>
 
-    @* Staff Distribution *@
     <div class="col-md-4">
         <div class="sbox h-100">
             <div class="slabel">Active Staff by Role</div>
@@ -101,7 +97,6 @@
     </div>
 </div>
 
-@* Blood Group Table *@
 @{
     var bloodGroups = ViewBag.BloodGroups as dynamic ?? new List<dynamic>();
 }
@@ -123,7 +118,6 @@
 </div>
 }
 
-@* Compliance Summary *@
 <div class="sbox" style="background:#f0f9ff;border:1px solid #bae6fd;">
     <div class="slabel" style="color:#0369a1;">Compliance & HIPAA Summary</div>
     <div class="row g-3">

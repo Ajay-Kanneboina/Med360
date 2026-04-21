@@ -1,0 +1,149 @@
+@using MediCore.Services
+@model List<MediCore.Models.Appointment>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "All Appointments";
+    var stats = ViewBag.Stats as AppointmentStats ?? new AppointmentStats();
+}
+
+<p class="page-s">Manage all appointments — confirm, complete, or cancel them.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-calendar2 me-1"></i>Total</div>
+            <div class="stat-n">@stats.Total</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-calendar-day me-1"></i>Today</div>
+            <div class="stat-n text-primary">@stats.Today</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-clock me-1"></i>Scheduled</div>
+            <div class="stat-n text-warning">@stats.Scheduled</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat">
+            <div class="stat-l mb-1"><i class="bi bi-check-circle me-1"></i>Completed</div>
+            <div class="stat-n text-success">@stats.Completed</div>
+        </div>
+    </div>
+</div>
+
+<div class="sbox mb-3">
+    <form method="get" class="row g-2">
+        <div class="col-sm-4">
+            <input type="text" name="search" value="@ViewBag.SearchFilter"
+                   class="form-control" placeholder="Search patient or doctor…" />
+        </div>
+        <div class="col-sm-3">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                @foreach (var s in new[] { "Scheduled","Confirmed","Completed","Cancelled","Rescheduled" })
+                {
+                    if (ViewBag.StatusFilter as string == s)
+                    { <option value="@s" selected>@s</option> }
+                    else
+                    { <option value="@s">@s</option> }
+                }
+            </select>
+        </div>
+        <div class="col-sm-3">
+            <input type="date" name="date" value="@ViewBag.DateFilter" class="form-control" />
+        </div>
+        <div class="col-sm-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-search"></i></button>
+            <a href="/Receptionist/Appointments" class="btn btn-outline-secondary">✕</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-calendar2-check me-2" style="color:#0f766e;"></i>Appointments</span>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="stat-l">@Model.Count result(s)</span>
+            <a href="/Receptionist/BookAppointment" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>Book New
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x" style="font-size:2rem;color:#99f6e4;"></i>
+                <div class="stat-l mt-2">No appointments found.</div>
+            </div>
+        }
+        else
+        {
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @{ int i = 1; }
+                @foreach (var a in Model)
+                {
+                    var pillCls = a.Status == "Completed"  ? "pill-d" :
+                                  a.Status == "Cancelled"  ? "pill-x" :
+                                  a.Status == "Confirmed"  ? "pill-r" : "pill-a";
+                    <tr>
+                        <td class="stat-l">@i</td>
+                        <td class="fw-semibold">@a.Patient?.FullName</td>
+                        <td class="stat-l">Dr. @a.Doctor?.FullName</td>
+                        <td class="stat-l">@a.AppointmentDate.ToString("dd MMM yyyy")</td>
+                        <td class="stat-l">@a.TimeSlot</td>
+                        <td><span class="pill @pillCls">@a.Status</span></td>
+                        <td>
+                            @if (a.Status != "Cancelled" && a.Status != "Completed")
+                            {
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <form method="post" action="/Receptionist/UpdateAppointmentStatus">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <input type="hidden" name="status" value="Confirmed" />
+                                        <button class="btn btn-sm btn-outline-primary py-0" style="font-size:.73rem;">Confirm</button>
+                                    </form>
+                                    <form method="post" action="/Receptionist/UpdateAppointmentStatus">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <input type="hidden" name="status" value="Completed" />
+                                        <button class="btn btn-sm btn-outline-success py-0" style="font-size:.73rem;">Complete</button>
+                                    </form>
+                                    <form method="post" action="/Receptionist/UpdateAppointmentStatus">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <input type="hidden" name="status" value="Cancelled" />
+                                        <input type="hidden" name="reason" value="Cancelled by receptionist" />
+                                        <button class="btn btn-sm btn-outline-danger py-0" style="font-size:.73rem;">Cancel</button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="stat-l">—</span>
+                            }
+                        </td>
+                    </tr>
+                    i++;
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

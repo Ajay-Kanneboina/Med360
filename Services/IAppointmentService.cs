@@ -5,18 +5,32 @@ namespace MediCore.Services
     public interface IAppointmentService
     {
         List<Patient> GetAllPatients();
-        List<User> GetAllDoctors();
-        List<string> GetAvailableSlots(int doctorId, DateTime date);
+        List<User>    GetAllDoctors();
+        List<string>  GetAvailableSlots(int doctorId, DateTime date);
+
         Appointment? BookAppointment(int patientId, int doctorId, DateTime date, string timeSlot, string? notes);
+
         List<Appointment> GetAllAppointments(string? status, string? search, DateTime? date);
-        AppointmentStats GetStats();
-        List<Appointment> GetDoctorAppointments(int doctorUserId, string? status);
-        List<Appointment> GetPatientAppointments(int patientId);
-        Appointment? UpdateStatus(int appointmentId, string newStatus);
-        Appointment? CancelAppointment(int appointmentId, string reason);
-        Appointment? Reschedule(int appointmentId, DateTime newDate, string newSlot);
+        AppointmentStats  GetStats();
+        Appointment?      UpdateStatus(int appointmentId, string newStatus);
+        Appointment?      CancelAppointment(int appointmentId, string reason);
+        Appointment?      Reschedule(int appointmentId, DateTime newDate, string newSlot);
+
+        List<Appointment>        GetDoctorAppointments(int doctorUserId, string? status);
         List<DoctorAvailability> GetDoctorAvailability(int doctorUserId);
-        void SaveAvailability(int doctorUserId, List<DoctorAvailability> slots);
+        void                     SaveAvailability(int doctorUserId, List<DoctorAvailability> slots);
+
+        List<Appointment> GetPatientAppointments(int patientId);
+
+        AppointmentRequest SendRequest(int patientId, string message, string? preferredDate, string? preferredTime);
+
+        List<AppointmentRequest> GetPendingRequests();
+
+        List<AppointmentRequest> GetPatientRequests(int patientId);
+
+        bool MarkRequestHandled(int requestId);
+
+        int GetPendingRequestCount();
     }
 
     public class AppointmentStats

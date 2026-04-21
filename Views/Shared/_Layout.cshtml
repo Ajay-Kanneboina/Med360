@@ -1,7 +1,3 @@
-@*
-    _Layout.cshtml — shared layout for Admin + Doctor/Nurse/Receptionist views.
-    All styles are inlined below; this view no longer depends on /css/staff.css.
-*@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +15,6 @@
             margin: 0;
         }
 
-        /* Sidebar — teal theme */
         .sidebar {
             width: 220px;
             background: #134e4a;
@@ -70,7 +65,6 @@
         .sb-user { color: #99d6d1; font-size: .79rem; margin-bottom: 8px; }
         .sb-user strong { color: #fff; display: block; }
 
-        /* Topbar */
         .topbar {
             position: fixed;
             left: 220px; right: 0; top: 0;
@@ -83,15 +77,12 @@
             z-index: 10;
         }
 
-        /* Main content area */
         .main    { margin-left: 220px; padding-top: 52px; min-height: 100vh; }
         .content { padding: 24px; }
 
-        /* Page headings */
         .page-h { font-size: 1.1rem; font-weight: 700; color: #134e4a; margin-bottom: 2px; }
         .page-s { font-size: .81rem; color: #6b9e99; margin-bottom: 18px; }
 
-        /* Cards */
         .card        { border: none; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
         .card-header {
             background: #fff;
@@ -102,12 +93,10 @@
             padding: 11px 16px;
         }
 
-        /* Stat boxes */
         .stat   { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
         .stat-n { font-size: 1.6rem; font-weight: 700; color: #134e4a; }
         .stat-l { font-size: .77rem; color: #6b9e99; }
 
-        /* Info boxes */
         .sbox   { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 16px; }
         .slabel {
             font-size: .68rem;
@@ -120,7 +109,6 @@
             margin-bottom: 14px;
         }
 
-        /* Tables */
         .table { font-size: .86rem; }
         .table thead th {
             background: #f0fdfa;
@@ -131,7 +119,6 @@
         .table td { border-bottom: 1px solid #f0fdf9; vertical-align: middle; }
         .table tr:last-child td { border-bottom: none; }
 
-        /* Info rows */
         .irow {
             display: flex;
             justify-content: space-between;
@@ -142,14 +129,12 @@
         .irow:last-child { border-bottom: none; }
         .ilbl { color: #6b9e99; font-weight: 600; }
 
-        /* Pills / badges */
         .pill   { border-radius: 20px; padding: 2px 10px; font-size: .74rem; font-weight: 600; }
         .pill-a { background: #fef9c3; color: #854d0e; }
         .pill-r { background: #ccfbf1; color: #0f766e; }
         .pill-d { background: #dcfce7; color: #166534; }
         .pill-x { background: #f1f5f9; color: #475569; }
 
-        /* Forms */
         .form-label { font-weight: 600; font-size: .79rem; color: #374151; margin-bottom: 4px; }
         .form-control, .form-select {
             border: 1px solid #99f6e4;
@@ -162,11 +147,9 @@
             outline: none;
         }
 
-        /* Buttons */
         .btn-primary       { background: #0f766e; border-color: #0f766e; }
         .btn-primary:hover { background: #0d6b63; border-color: #0d6b63; }
 
-        /* Alerts */
         .alert { border: none; border-radius: 8px; font-size: .86rem; }
     </style>
 </head>
@@ -175,7 +158,7 @@
     var uname = Context.Session.GetString("UserName") ?? "";
     var urole = Context.Session.GetString("UserRole") ?? "";
     var upath = Context.Request.Path.Value ?? "";
-    var uqs   = Context.Request.QueryString.Value ?? "";   // query string e.g. "?filter=unread"
+    var uqs   = Context.Request.QueryString.Value ?? "";
     bool isStaff = !string.IsNullOrEmpty(uname) && urole != "Patient";
     int nc = 0;
     if (isStaff)
@@ -189,7 +172,7 @@
 {
     <aside class="sidebar">
         <div class="sb-logo">
-            <img src="/images/logo.svg" width="26" height="26" style="border-radius:50%;" /> MediCore360
+            <img src="/images/logo.svg" width="34" height="34" style="border-radius:50%;flex-shrink:0;" onerror="this.style.display='none'" /> MediCore360
         </div>
         <nav style="flex:1;padding:8px 0;overflow-y:auto;">
         @if (urole == "Admin")
@@ -224,6 +207,10 @@
             </a>
             <a href="/Appointment/Book" class="sb-link @(upath.StartsWith("/Appointment/Book") ? "sb-on" : "")">
                 <i class="bi bi-calendar2-plus"></i> Book Appointment
+            </a>
+            <div class="sb-grp">Appointments</div>
+            <a href="/Admin/Appointments" class="sb-link @(upath.StartsWith("/Admin/Appointments") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> Appointments
             </a>
             <div class="sb-grp">Compliance</div>
             <a href="/Admin/AuditLog" class="sb-link @(upath.StartsWith("/Admin/AuditLog") ? "sb-on" : "")">
@@ -269,13 +256,6 @@
             <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
                 <i class="bi bi-people"></i> All Patients
             </a>
-            <div class="sb-grp">Appointments</div>
-            <a href="/Appointment/Index" class="sb-link @(upath=="/Appointment/Index" || upath=="/Appointment" ? "sb-on" : "")">
-                <i class="bi bi-calendar2-check"></i> All Appointments
-            </a>
-            <a href="/Appointment/Book" class="sb-link @(upath.StartsWith("/Appointment/Book") ? "sb-on" : "")">
-                <i class="bi bi-calendar2-plus"></i> Book Appointment
-            </a>
             <div class="sb-grp">Complaints</div>
             <a href="/Doctor/Complaints" class="sb-link @(upath=="/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-chat-square-text"></i> All Complaints
@@ -291,6 +271,17 @@
             <a href="/Receptionist/Dashboard" class="sb-link @(upath == "/Receptionist/Dashboard" ? "sb-on" : "")">
                 <i class="bi bi-grid-1x2"></i> Dashboard
             </a>
+            <div class="sb-grp">Appointments</div>
+            <a href="/Receptionist/AppointmentRequests" class="sb-link @(upath.StartsWith("/Receptionist/AppointmentRequests") ? "sb-on" : "")">
+                <i class="bi bi-envelope-check"></i> Patient Requests
+                @{ var pr = ViewBag.PendingRequests as int?; if (pr > 0) { <span class="badge bg-warning text-dark ms-auto">@pr</span> } }
+            </a>
+            <a href="/Receptionist/BookAppointment" class="sb-link @(upath.StartsWith("/Receptionist/BookAppointment") ? "sb-on" : "")">
+                <i class="bi bi-calendar-plus"></i> Book Appointment
+            </a>
+            <a href="/Receptionist/Appointments" class="sb-link @(upath.StartsWith("/Receptionist/Appointments") ? "sb-on" : "")">
+                <i class="bi bi-calendar2-check"></i> All Appointments
+            </a>
             <div class="sb-grp">Staff</div>
             <a href="/Receptionist/Doctors" class="sb-link @(upath.StartsWith("/Receptionist/Doctors") ? "sb-on" : "")">
                 <i class="bi bi-person-badge"></i> All Doctors
@@ -299,15 +290,8 @@
             <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
                 <i class="bi bi-people"></i> All Patients
             </a>
-            <div class="sb-grp">Appointments</div>
-            <a href="/Appointment/Index" class="sb-link @(upath=="/Appointment/Index" || upath=="/Appointment" ? "sb-on" : "")">
-                <i class="bi bi-calendar2-check"></i> All Appointments
-            </a>
-            <a href="/Appointment/Book" class="sb-link @(upath.StartsWith("/Appointment/Book") ? "sb-on" : "")">
-                <i class="bi bi-calendar2-plus"></i> Book Appointment
-            </a>
             <div class="sb-grp">Complaints</div>
-            <a href="/Doctor/Complaints" class="sb-link @(upath == "/Doctor/Complaints" ? "sb-on" : "")">
+            <a href="/Doctor/Complaints" class="sb-link @(upath == "/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
                 <i class="bi bi-chat-square-text"></i> All Complaints
                 @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
             </a>

@@ -129,5 +129,47 @@ namespace MediCore.Services
             foreach (var s in slots) { s.DoctorId = doctorUserId; _db.DoctorAvailabilities.Add(s); }
             _db.SaveChanges();
         }
+
+        public AppointmentRequest SendRequest(int patientId, string message,
+                                              string? preferredDate, string? preferredTime)
+        {
+            var req = new AppointmentRequest
+            {
+                PatientId     = patientId,
+                Message       = message,
+                PreferredDate = preferredDate,
+                PreferredTime = preferredTime,
+                IsHandled     = false,
+                SentAt        = DateTime.Now
+            };
+            _db.AppointmentRequests.Add(req);
+            _db.SaveChanges();
+            return req;
+        }
+
+        public List<AppointmentRequest> GetPendingRequests() =>
+            _db.AppointmentRequests
+               .Include(r => r.Patient)
+               .Where(r => !r.IsHandled)
+               .OrderByDescending(r => r.SentAt)
+               .ToList();
+
+        public List<AppointmentRequest> GetPatientRequests(int patientId) =>
+            _db.AppointmentRequests
+               .Where(r => r.PatientId == patientId)
+               .OrderByDescending(r => r.SentAt)
+               .ToList();
+
+        public bool MarkRequestHandled(int requestId)
+        {
+            var req = _db.AppointmentRequests.Find(requestId);
+            if (req == null) return false;
+            req.IsHandled = true;
+            _db.SaveChanges();
+            return true;
+        }
+
+        public int GetPendingRequestCount() =>
+            _db.AppointmentRequests.Count(r => !r.IsHandled);
     }
 }
