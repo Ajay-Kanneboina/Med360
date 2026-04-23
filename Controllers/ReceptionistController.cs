@@ -27,14 +27,11 @@ namespace MediCore.Controllers
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
 
             var stats = _doctorService.GetDashboardStats();
-            ViewBag.TotalPatients    = stats.TotalPatients;
-            ViewBag.TotalRecords     = stats.TotalRecords;
-            ViewBag.TotalComplaints  = stats.UnreadComplaints;
-            ViewBag.NewComplaints    = stats.UnreadComplaints;
+            ViewBag.TotalPatients  = stats.TotalPatients;
+            ViewBag.TotalRecords   = stats.TotalRecords;
 
-            ViewBag.RecentPatients   = _adminService.GetRecentPatients(5);
-            ViewBag.RecentComplaints = _adminService.GetRecentComplaints(5);
-            ViewBag.Doctors          = _adminService.GetAllStaff("Doctor", null);
+            ViewBag.RecentPatients = _adminService.GetRecentPatients(5);
+            ViewBag.Doctors        = _adminService.GetAllStaff("Doctor", null);
 
             return View();
         }
@@ -51,7 +48,6 @@ namespace MediCore.Controllers
         public IActionResult AppointmentRequests()
         {
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
-            ViewBag.NewComplaints    = 0;
             ViewBag.PendingRequests  = _apptService.GetPendingRequestCount();
             return View(_apptService.GetPendingRequests());
         }
@@ -78,7 +74,6 @@ namespace MediCore.Controllers
             ViewBag.SearchFilter    = search ?? "";
             ViewBag.DateFilter      = date   ?? "";
             ViewBag.PendingRequests = _apptService.GetPendingRequestCount();
-            ViewBag.NewComplaints   = 0;
 
             return View(_apptService.GetAllAppointments(status, search, dateFilter));
         }
@@ -92,7 +87,6 @@ namespace MediCore.Controllers
             ViewBag.RequestId       = requestId;
             ViewBag.SelectedPatient = patientId;
             ViewBag.PendingRequests = _apptService.GetPendingRequestCount();
-            ViewBag.NewComplaints   = 0;
             return View();
         }
 

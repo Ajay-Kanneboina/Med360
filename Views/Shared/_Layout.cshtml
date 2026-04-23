@@ -290,11 +290,6 @@
             <a href="/Doctor/Patients" class="sb-link @(upath.StartsWith("/Doctor/Patients") ? "sb-on" : "")">
                 <i class="bi bi-people"></i> All Patients
             </a>
-            <div class="sb-grp">Complaints</div>
-            <a href="/Doctor/Complaints" class="sb-link @(upath == "/Doctor/Complaints" && !uqs.Contains("filter=unread") ? "sb-on" : "")">
-                <i class="bi bi-chat-square-text"></i> All Complaints
-                @if (nc > 0) { <span class="badge bg-danger ms-auto">@nc</span> }
-            </a>
         }
         </nav>
         <div class="sb-foot">

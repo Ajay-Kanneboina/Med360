@@ -1,9 +1,8 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Receptionist Dashboard";
-    var recentPatients   = ViewBag.RecentPatients   as List<MediCore.Models.Patient>   ?? new();
-    var recentComplaints = ViewBag.RecentComplaints as List<MediCore.Models.Complaint> ?? new();
-    var doctors          = ViewBag.Doctors          as List<MediCore.Models.User>      ?? new();
+    var recentPatients = ViewBag.RecentPatients as List<MediCore.Models.Patient> ?? new();
+    var doctors        = ViewBag.Doctors        as List<MediCore.Models.User>   ?? new();
 }
 
 <p class="page-s">Welcome back — here's the front desk overview.</p>
@@ -21,12 +20,6 @@
             <div class="stat-n">@ViewBag.TotalRecords</div>
         </div>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="stat">
-            <div class="stat-l mb-1"><i class="bi bi-chat-square-text me-1"></i>Unread Complaints</div>
-            <div class="stat-n text-danger">@ViewBag.TotalComplaints</div>
-        </div>
-    </div>
 </div>
 
 <div class="row g-3 mb-4">
@@ -37,9 +30,7 @@
                 <a href="/Doctor/Patients" class="btn btn-sm btn-primary">
                     <i class="bi bi-people me-1"></i> All Patients
                 </a>
-                <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-chat-square-text me-1"></i> All Complaints
-                </a>
+
             </div>
         </div>
     </div>
@@ -47,7 +38,7 @@
 
 <div class="row g-3">
 
-    <div class="col-md-6">
+    <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-person-plus me-2" style="color:#0f766e;"></i>Recently Registered Patients</span>
@@ -90,46 +81,6 @@
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-chat-square-text me-2 text-danger"></i>Recent Complaints</span>
-                <a href="/Doctor/Complaints" class="stat-l text-decoration-none">View all →</a>
-            </div>
-            <div class="card-body p-0">
-                @if (!recentComplaints.Any())
-                {
-                    <div class="text-center py-4 stat-l">No complaints yet.</div>
-                }
-                else
-                {
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Patient</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var c in recentComplaints)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@(c.Patient?.FullName ?? "—")</td>
-                                <td>
-                                    @if (c.Status == "Active")       { <span class="pill pill-a">Active</span> }
-                                    else if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
-                                    else                             { <span class="pill pill-x">@c.Status</span> }
-                                </td>
-                                <td class="stat-l">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                }
-            </div>
-        </div>
-    </div>
 
 </div>
 

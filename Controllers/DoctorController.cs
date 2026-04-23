@@ -30,6 +30,12 @@ namespace MediCore.Controllers
             return role == "Doctor" || role == "Admin";
         }
 
+        private bool CanViewComplaints()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            return role == "Doctor" || role == "Admin" || role == "Nurse";
+        }
+
         private void SetSidebarBag()
         {
             ViewBag.NewComplaints = _doctorService.GetUnreadCount();
@@ -176,7 +182,7 @@ namespace MediCore.Controllers
 
         public IActionResult Complaints(string? filter)
         {
-            if (!IsStaff()) return RedirectToAction("Login", "Account");
+            if (!CanViewComplaints()) return RedirectToAction("Login", "Account");
             SetSidebarBag();
 
             ViewBag.Filter      = filter ?? "all";
@@ -187,7 +193,7 @@ namespace MediCore.Controllers
 
         public IActionResult ViewComplaint(int id)
         {
-            if (!IsStaff()) return RedirectToAction("Login", "Account");
+            if (!CanViewComplaints()) return RedirectToAction("Login", "Account");
             SetSidebarBag();
 
             var complaint = _doctorService.GetAndMarkRead(id);
@@ -199,7 +205,7 @@ namespace MediCore.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult Respond(int id, string response, string status)
         {
-            if (!IsStaff()) return RedirectToAction("Login", "Account");
+            if (!CanViewComplaints()) return RedirectToAction("Login", "Account");
 
             var doctorName = HttpContext.Session.GetString("UserName") ?? "Unknown";
 
