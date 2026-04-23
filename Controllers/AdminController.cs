@@ -34,7 +34,6 @@ namespace MediCore.Controllers
 
             var stats = _adminService.GetDashboardStats();
             ViewBag.TotalPatients      = stats.TotalPatients;
-            ViewBag.TotalUsers         = stats.TotalUsers;
             ViewBag.TotalRecords       = stats.TotalRecords;
             ViewBag.TotalComplaints    = stats.TotalComplaints;
             ViewBag.ActiveRecords      = stats.ActiveRecords;

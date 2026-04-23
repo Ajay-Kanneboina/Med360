@@ -84,14 +84,5 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult Reschedule(int id, string newDate, string newSlot)
-        {
-            if (!IsStaff()) return RedirectToAction("Login","Account");
-            if (!DateTime.TryParse(newDate, out var d)) { TempData["Error"]="Invalid date."; return RedirectToAction(nameof(Index)); }
-            var r = _svc.Reschedule(id, d, newSlot);
-            if (r == null) { TempData["Error"]="Slot taken."; return RedirectToAction(nameof(Index)); }
-            TempData["Success"]="Rescheduled."; return RedirectToAction(nameof(Index));
-        }
     }
 }

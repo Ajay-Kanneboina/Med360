@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using MediCore.Data;
 using MediCore.Models;
 
@@ -9,19 +8,6 @@ namespace MediCore.Services
         private readonly AppDbContext _db;
 
         public PatientService(AppDbContext db) => _db = db;
-
-        public Patient? GetPatientForDashboard(int patientId) =>
-            _db.Patients
-               .Include(p => p.Complaints)
-               .Include(p => p.Records)
-               .FirstOrDefault(p => p.Id == patientId);
-
-        public PatientDashboardStats GetDashboardStats(int patientId) => new PatientDashboardStats
-        {
-            OpenCount     = _db.Complaints.Count(c => c.PatientId == patientId && c.Status == "Active"),
-            ReviewedCount = _db.Complaints.Count(c => c.PatientId == patientId && c.Status == "Reviewed"),
-            RecordCount   = _db.Records.Count(r => r.PatientId == patientId)
-        };
 
         public List<Record> GetMyRecords(int patientId, string? status, string? search)
         {
@@ -76,12 +62,6 @@ namespace MediCore.Services
             _db.Complaints.Add(complaint);
             _db.SaveChanges();
             return complaint;
-        }
-
-        public Complaint? GetMyComplaint(int complaintId, int patientId)
-        {
-            var complaint = _db.Complaints.Find(complaintId);
-            return (complaint == null || complaint.PatientId != patientId) ? null : complaint;
         }
 
         public bool UpdateComplaint(int complaintId, int patientId,

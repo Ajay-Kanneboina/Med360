@@ -14,7 +14,6 @@ namespace MediCore.Services
         AppointmentStats  GetStats();
         Appointment?      UpdateStatus(int appointmentId, string newStatus);
         Appointment?      CancelAppointment(int appointmentId, string reason);
-        Appointment?      Reschedule(int appointmentId, DateTime newDate, string newSlot);
 
         List<Appointment>        GetDoctorAppointments(int doctorUserId, string? status);
         List<DoctorAvailability> GetDoctorAvailability(int doctorUserId);

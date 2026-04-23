@@ -106,19 +106,6 @@ namespace MediCore.Services
             _db.SaveChanges(); return a;
         }
 
-        public Appointment? Reschedule(int id, DateTime newDate, string newSlot)
-        {
-            var a = _db.Appointments.Find(id);
-            if (a == null) return null;
-            bool conflict = _db.Appointments.Any(x =>
-                x.Id != id && x.DoctorId == a.DoctorId && x.AppointmentDate.Date == newDate.Date &&
-                x.TimeSlot == newSlot && x.Status != "Cancelled");
-            if (conflict) return null;
-            a.AppointmentDate = newDate.Date; a.TimeSlot = newSlot;
-            a.Status = "Rescheduled"; a.UpdatedAt = DateTime.Now;
-            _db.SaveChanges(); return a;
-        }
-
         public List<DoctorAvailability> GetDoctorAvailability(int doctorUserId) =>
             _db.DoctorAvailabilities.Where(d => d.DoctorId == doctorUserId).OrderBy(d => d.DayOfWeek).ToList();
 

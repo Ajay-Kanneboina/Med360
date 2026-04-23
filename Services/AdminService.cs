@@ -14,7 +14,6 @@ namespace MediCore.Services
         public AdminDashboardStats GetDashboardStats() => new AdminDashboardStats
         {
             TotalPatients      = _db.Patients.Count(),
-            TotalUsers         = _db.Users.Count(),
             TotalRecords       = _db.Records.Count(),
             TotalComplaints    = _db.Complaints.Count(),
             ActiveRecords      = _db.Records.Count(r => r.Status == "Active"),

@@ -4,16 +4,12 @@ namespace MediCore.Services
 {
     public interface IPatientService
     {
-        Patient? GetPatientForDashboard(int patientId);
-        PatientDashboardStats GetDashboardStats(int patientId);
-
         List<Record> GetMyRecords(int patientId, string? status, string? search);
         PatientRecordStats GetRecordStats(int patientId);
         Record? GetMyRecord(int recordId, int patientId);
 
         List<Complaint> GetMyComplaints(int patientId);
         Complaint SubmitComplaint(int patientId, string description, string? additionalNotes);
-        Complaint? GetMyComplaint(int complaintId, int patientId);
         bool UpdateComplaint(int complaintId, int patientId,
                              string description, string? additionalNotes);
 
@@ -27,13 +23,6 @@ namespace MediCore.Services
                            string?   gender,
                            string?   bloodGroup,
                            string?   medicalHistory);
-    }
-
-    public class PatientDashboardStats
-    {
-        public int OpenCount     { get; set; }
-        public int ReviewedCount { get; set; }
-        public int RecordCount   { get; set; }
     }
 
     public class PatientRecordStats

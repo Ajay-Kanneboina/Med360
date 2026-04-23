@@ -27,7 +27,6 @@ namespace MediCore.Services
     public class AdminDashboardStats
     {
         public int TotalPatients { get; set; }
-        public int TotalUsers { get; set; }
         public int TotalRecords { get; set; }
         public int TotalComplaints { get; set; }
         public int ActiveRecords { get; set; }

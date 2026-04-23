@@ -94,12 +94,6 @@ namespace MediCore.Controllers
             return RedirectToAction(nameof(MyComplaints));
         }
 
-        public IActionResult EditComplaint(int id)
-        {
-            if (!IsPatient()) return RedirectToAction("Login", "Account");
-            return RedirectToAction(nameof(MyComplaints));
-        }
-
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult EditComplaint(int id, string description, string? additionalNotes)
         {
@@ -129,12 +123,6 @@ namespace MediCore.Controllers
             if (patient == null) return View("NoRecord");
 
             return View(patient);
-        }
-
-        public IActionResult EditProfile()
-        {
-            if (!IsPatient()) return RedirectToAction("Login", "Account");
-            return RedirectToAction(nameof(MyProfile));
         }
 
         [HttpPost, ValidateAntiForgeryToken]
