@@ -2,7 +2,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Receptionist Dashboard";
     var recentPatients = ViewBag.RecentPatients as List<MediCore.Models.Patient> ?? new();
-    var doctors        = ViewBag.Doctors        as List<MediCore.Models.User>   ?? new();
+    var doctors = ViewBag.Doctors as List<MediCore.Models.User> ?? new();
 }
 
 <p class="page-s">Welcome back — here's the front desk overview.</p>

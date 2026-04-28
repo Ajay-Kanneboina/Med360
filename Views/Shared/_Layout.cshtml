@@ -158,7 +158,7 @@
     var uname = Context.Session.GetString("UserName") ?? "";
     var urole = Context.Session.GetString("UserRole") ?? "";
     var upath = Context.Request.Path.Value ?? "";
-    var uqs   = Context.Request.QueryString.Value ?? "";
+    var uqs = Context.Request.QueryString.Value ?? "";
     bool isStaff = !string.IsNullOrEmpty(uname) && urole != "Patient";
     int nc = 0;
     if (isStaff)

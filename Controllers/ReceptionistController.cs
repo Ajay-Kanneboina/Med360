@@ -1,22 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
+using MediCore.Models;
 using MediCore.Services;
 
 namespace MediCore.Controllers
 {
     public class ReceptionistController : Controller
     {
-        private readonly IDoctorService      _doctorService;
-        private readonly IAdminService       _adminService;
+        private readonly IDoctorService _doctorService;
+        private readonly IAdminService  _adminService;
         private readonly IAppointmentService _apptService;
-        private readonly IAuditService       _audit;
+        private readonly IAuditService _audit;
 
         public ReceptionistController(IDoctorService doctorService, IAdminService adminService,
                                       IAppointmentService apptService, IAuditService audit)
         {
             _doctorService = doctorService;
-            _adminService  = adminService;
-            _apptService   = apptService;
-            _audit         = audit;
+            _adminService = adminService;
+            _apptService  = apptService;
+            _audit = audit;
         }
 
         private bool IsReceptionist() =>
@@ -27,11 +28,11 @@ namespace MediCore.Controllers
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
 
             var stats = _doctorService.GetDashboardStats();
-            ViewBag.TotalPatients  = stats.TotalPatients;
-            ViewBag.TotalRecords   = stats.TotalRecords;
+            ViewBag.TotalPatients = stats.TotalPatients;
+            ViewBag.TotalRecords = stats.TotalRecords;
 
             ViewBag.RecentPatients = _adminService.GetRecentPatients(5);
-            ViewBag.Doctors        = _adminService.GetAllStaff("Doctor", null);
+            ViewBag.Doctors = _adminService.GetAllStaff("Doctor", null);
 
             return View();
         }
@@ -48,6 +49,7 @@ namespace MediCore.Controllers
         public IActionResult AppointmentRequests()
         {
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
+
             ViewBag.PendingRequests  = _apptService.GetPendingRequestCount();
             return View(_apptService.GetPendingRequests());
         }
@@ -56,6 +58,7 @@ namespace MediCore.Controllers
         public IActionResult HandleRequest(int id)
         {
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
+
             _apptService.MarkRequestHandled(id);
             TempData["Success"] = "Request marked as handled.";
             return RedirectToAction(nameof(AppointmentRequests));
@@ -69,10 +72,10 @@ namespace MediCore.Controllers
             if (DateTime.TryParse(date, out var d)) dateFilter = d;
 
             var stats = _apptService.GetStats();
-            ViewBag.Stats           = stats;
-            ViewBag.StatusFilter    = status ?? "";
-            ViewBag.SearchFilter    = search ?? "";
-            ViewBag.DateFilter      = date   ?? "";
+            ViewBag.Stats = stats;
+            ViewBag.StatusFilter = status ?? "";
+            ViewBag.SearchFilter = search ?? "";
+            ViewBag.DateFilter = date ?? "";
             ViewBag.PendingRequests = _apptService.GetPendingRequestCount();
 
             return View(_apptService.GetAllAppointments(status, search, dateFilter));
@@ -82,28 +85,26 @@ namespace MediCore.Controllers
         {
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
 
-            ViewBag.Patients        = _apptService.GetAllPatients();
-            ViewBag.Doctors         = _apptService.GetAllDoctors();
-            ViewBag.RequestId       = requestId;
+            ViewBag.Patients = _apptService.GetAllPatients();
+            ViewBag.Doctors = _apptService.GetAllDoctors();
+            ViewBag.RequestId = requestId;
             ViewBag.SelectedPatient = patientId;
             ViewBag.PendingRequests = _apptService.GetPendingRequestCount();
             return View();
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult BookAppointment(int patientId, int doctorId,
-                                             string appointmentDate, string timeSlot,
-                                             string? notes, int? requestId)
+        public IActionResult BookAppointment(Appointment input, int? requestId)
         {
             if (!IsReceptionist()) return RedirectToAction("Login", "Account");
 
-            if (!DateTime.TryParse(appointmentDate, out var d))
+            if (input.AppointmentDate == default)
             {
                 TempData["Error"] = "Invalid date selected.";
                 return RedirectToAction(nameof(BookAppointment));
             }
 
-            var appt = _apptService.BookAppointment(patientId, doctorId, d, timeSlot, notes);
+            var appt = _apptService.BookAppointment(input);
             if (appt == null)
             {
                 TempData["Error"] = "That time slot is already taken. Please choose another.";
@@ -114,11 +115,17 @@ namespace MediCore.Controllers
                 _apptService.MarkRequestHandled(requestId.Value);
 
             var receptionistName = HttpContext.Session.GetString("UserName") ?? "Receptionist";
-            _audit.Log(receptionistName, "Appointment Booked",
-                       $"Patient #{patientId} with Doctor #{doctorId} on {d:dd MMM yyyy} {timeSlot}",
-                       "Appointment", HttpContext.Session.GetInt32("UserId"));
 
-            TempData["Success"] = $"Appointment booked for {d:dd MMM yyyy} at {timeSlot}.";
+            _audit.Log(new AuditLog
+            {
+                Actor    = receptionistName,
+                Action   = "Appointment Booked",
+                Target   = $"Patient #{input.PatientId} with Doctor #{input.DoctorId} on {input.AppointmentDate:dd MMM yyyy} {input.TimeSlot}",
+                Category = "Appointment",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
+
+            TempData["Success"] = $"Appointment booked for {input.AppointmentDate:dd MMM yyyy} at {input.TimeSlot}.";
             return RedirectToAction(nameof(Appointments));
         }
 

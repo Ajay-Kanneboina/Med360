@@ -13,24 +13,22 @@ namespace MediCore.Services
         List<string> GetBloodGroups();
         Patient? GetPatientDetail(int id);
 
-        Record AddRecord(int patientId, string diagnosis, string treatment,
-                         string? notes, DateTime visitDate, string status, string doctorName);
+        Record AddRecord(Record data, string doctorName);
         Record? GetRecord(int id);
-        bool UpdateRecord(int id, string diagnosis, string treatment,
-                          string? notes, DateTime visitDate, string status);
+        bool UpdateRecord(int id, Record data);
         bool CloseRecord(int id);
 
         List<Complaint> GetComplaints(string? filter);
         int GetUnreadCount();
         Complaint? GetAndMarkRead(int id);
-        bool RespondToComplaint(int id, string response, string status, string doctorName);
+        bool RespondToComplaint(int id, Complaint data, string doctorName);
     }
 
     public class DoctorDashboardStats
     {
-        public int TotalPatients    { get; set; }
-        public int TotalRecords     { get; set; }
-        public int ActiveRecords    { get; set; }
+        public int TotalPatients { get; set; }
+        public int TotalRecords  { get; set; }
+        public int ActiveRecords { get; set; }
         public int UnreadComplaints { get; set; }
     }
 }

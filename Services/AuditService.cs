@@ -9,17 +9,10 @@ namespace MediCore.Services
 
         public AuditService(AppDbContext db) => _db = db;
 
-        public void Log(string actor, string action, string target, string category, int? userId = null)
+        public void Log(AuditLog entry)
         {
-            _db.AuditLogs.Add(new AuditLog
-            {
-                UserId    = userId,
-                Actor     = actor,
-                Action    = action,
-                Target    = target,
-                Category  = category,
-                Timestamp = DateTime.Now
-            });
+            entry.Timestamp = DateTime.Now;
+            _db.AuditLogs.Add(entry);
             _db.SaveChanges();
         }
     }

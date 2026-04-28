@@ -97,8 +97,8 @@ else
     document.querySelectorAll('[data-complaint]').forEach(card => {
         const toggle = card.querySelector('.js-edit-toggle');
         const cancel = card.querySelector('.js-edit-cancel');
-        const view   = card.querySelector('.js-view');
-        const edit   = card.querySelector('.js-edit');
+        const view = card.querySelector('.js-view');
+        const edit = card.querySelector('.js-edit');
         if (!toggle || !view || !edit) return;
 
         toggle.addEventListener('click', () => {

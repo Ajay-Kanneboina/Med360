@@ -30,7 +30,7 @@ namespace MediCore.Services
 
         public PatientRecordStats GetRecordStats(int patientId) => new PatientRecordStats
         {
-            Total  = _db.Records.Count(r => r.PatientId == patientId),
+            Total = _db.Records.Count(r => r.PatientId == patientId),
             Active = _db.Records.Count(r => r.PatientId == patientId && r.Status == "Active"),
             Closed = _db.Records.Count(r => r.PatientId == patientId && r.Status == "Closed")
         };
@@ -47,33 +47,32 @@ namespace MediCore.Services
                .OrderByDescending(c => c.UpdatedAt)
                .ToList();
 
-        public Complaint SubmitComplaint(int patientId, string description, string? additionalNotes)
+        public Complaint SubmitComplaint(int patientId, Complaint data)
         {
             var complaint = new Complaint
             {
-                PatientId       = patientId,
-                Description     = description,
-                AdditionalNotes = additionalNotes,
-                Status          = "Active",
-                IsRead          = false,
-                SubmittedAt     = DateTime.Now,
-                UpdatedAt       = DateTime.Now
+                PatientId = patientId,
+                Description = data.Description,
+                AdditionalNotes = data.AdditionalNotes,
+                Status = "Active",
+                IsRead = false,
+                SubmittedAt = DateTime.Now,
+                UpdatedAt  = DateTime.Now
             };
             _db.Complaints.Add(complaint);
             _db.SaveChanges();
             return complaint;
         }
 
-        public bool UpdateComplaint(int complaintId, int patientId,
-                                    string description, string? additionalNotes)
+        public bool UpdateComplaint(int complaintId, int patientId, Complaint data)
         {
             var complaint = _db.Complaints.Find(complaintId);
             if (complaint == null || complaint.PatientId != patientId) return false;
 
-            complaint.Description     = description;
-            complaint.AdditionalNotes = additionalNotes;
-            complaint.UpdatedAt       = DateTime.Now;
-            complaint.IsRead          = false;
+            complaint.Description = data.Description;
+            complaint.AdditionalNotes = data.AdditionalNotes;
+            complaint.UpdatedAt = DateTime.Now;
+            complaint.IsRead = false;
             _db.SaveChanges();
             return true;
         }
@@ -81,28 +80,20 @@ namespace MediCore.Services
         public Patient? GetMyProfile(int patientId) =>
             _db.Patients.Find(patientId);
 
-        public bool UpdateProfile(int patientId,
-                                  string?   phone,
-                                  string?   email,
-                                  string?   address,
-                                  string?   emergencyContact,
-                                  DateTime? dateOfBirth,
-                                  string?   gender,
-                                  string?   bloodGroup,
-                                  string?   medicalHistory)
+        public bool UpdateProfile(int patientId, Patient data)
         {
             var patient = _db.Patients.Find(patientId);
             if (patient == null) return false;
 
-            patient.Phone            = phone;
-            patient.Email            = email;
-            patient.Address          = address;
-            patient.EmergencyContact = emergencyContact;
+            patient.Phone  = data.Phone;
+            patient.Email  = data.Email;
+            patient.Address = data.Address;
+            patient.EmergencyContact = data.EmergencyContact;
 
-            if (dateOfBirth.HasValue) patient.DateOfBirth = dateOfBirth.Value;
-            patient.Gender         = string.IsNullOrWhiteSpace(gender)         ? null : gender;
-            patient.BloodGroup     = string.IsNullOrWhiteSpace(bloodGroup)     ? null : bloodGroup;
-            patient.MedicalHistory = string.IsNullOrWhiteSpace(medicalHistory) ? null : medicalHistory;
+            if (data.DateOfBirth != default) patient.DateOfBirth = data.DateOfBirth;
+            patient.Gender  = string.IsNullOrWhiteSpace(data.Gender) ? null : data.Gender;
+            patient.BloodGroup = string.IsNullOrWhiteSpace(data.BloodGroup) ? null : data.BloodGroup;
+            patient.MedicalHistory = string.IsNullOrWhiteSpace(data.MedicalHistory) ? null : data.MedicalHistory;
 
             _db.SaveChanges();
             return true;

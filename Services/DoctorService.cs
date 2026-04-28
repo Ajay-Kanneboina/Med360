@@ -12,9 +12,9 @@ namespace MediCore.Services
 
         public DoctorDashboardStats GetDashboardStats() => new DoctorDashboardStats
         {
-            TotalPatients    = _db.Patients.Count(),
-            TotalRecords     = _db.Records.Count(),
-            ActiveRecords    = _db.Records.Count(r => r.Status == "Active"),
+            TotalPatients = _db.Patients.Count(),
+            TotalRecords  = _db.Records.Count(),
+            ActiveRecords  = _db.Records.Count(r => r.Status == "Active"),
             UnreadComplaints = _db.Complaints.Count(c => !c.IsRead)
         };
 
@@ -79,19 +79,18 @@ namespace MediCore.Services
                .Include(p => p.Complaints)
                .FirstOrDefault(p => p.Id == id);
 
-        public Record AddRecord(int patientId, string diagnosis, string treatment,
-                                string? notes, DateTime visitDate, string status, string doctorName)
+        public Record AddRecord(Record data, string doctorName)
         {
             var record = new Record
             {
-                PatientId  = patientId,
-                Diagnosis  = diagnosis,
-                Treatment  = treatment,
-                Notes      = notes,
-                VisitDate  = visitDate,
-                Status     = string.IsNullOrWhiteSpace(status) ? "Active" : status,
+                PatientId  = data.PatientId,
+                Diagnosis  = data.Diagnosis,
+                Treatment  = data.Treatment,
+                Notes  = data.Notes,
+                VisitDate  = data.VisitDate,
+                Status = string.IsNullOrWhiteSpace(data.Status) ? "Active" : data.Status,
                 DoctorName = doctorName,
-                CreatedAt  = DateTime.Now
+                CreatedAt = DateTime.Now
             };
 
             _db.Records.Add(record);
@@ -102,17 +101,16 @@ namespace MediCore.Services
         public Record? GetRecord(int id) =>
             _db.Records.Include(r => r.Patient).FirstOrDefault(r => r.Id == id);
 
-        public bool UpdateRecord(int id, string diagnosis, string treatment,
-                                 string? notes, DateTime visitDate, string status)
+        public bool UpdateRecord(int id, Record data)
         {
             var record = _db.Records.Find(id);
             if (record == null) return false;
 
-            record.Diagnosis = diagnosis;
-            record.Treatment = treatment;
-            record.Notes     = notes;
-            record.VisitDate = visitDate;
-            record.Status    = status;
+            record.Diagnosis = data.Diagnosis;
+            record.Treatment = data.Treatment;
+            record.Notes = data.Notes;
+            record.VisitDate = data.VisitDate;
+            record.Status = data.Status;
             _db.SaveChanges();
             return true;
         }
@@ -153,16 +151,16 @@ namespace MediCore.Services
             return complaint;
         }
 
-        public bool RespondToComplaint(int id, string response, string status, string doctorName)
+        public bool RespondToComplaint(int id, Complaint data, string doctorName)
         {
             var complaint = _db.Complaints.Find(id);
             if (complaint == null) return false;
 
-            complaint.DoctorResponse = response;
-            complaint.RespondedBy    = doctorName;
-            complaint.RespondedAt    = DateTime.Now;
-            complaint.Status         = status;
-            complaint.UpdatedAt      = DateTime.Now;
+            complaint.DoctorResponse = data.DoctorResponse;
+            complaint.RespondedBy = doctorName;
+            complaint.RespondedAt = DateTime.Now;
+            complaint.Status = data.Status;
+            complaint.UpdatedAt = DateTime.Now;
             _db.SaveChanges();
             return true;
         }

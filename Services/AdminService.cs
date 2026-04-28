@@ -13,16 +13,16 @@ namespace MediCore.Services
 
         public AdminDashboardStats GetDashboardStats() => new AdminDashboardStats
         {
-            TotalPatients      = _db.Patients.Count(),
-            TotalRecords       = _db.Records.Count(),
-            TotalComplaints    = _db.Complaints.Count(),
-            ActiveRecords      = _db.Records.Count(r => r.Status == "Active"),
+            TotalPatients = _db.Patients.Count(),
+            TotalRecords  = _db.Records.Count(),
+            TotalComplaints = _db.Complaints.Count(),
+            ActiveRecords  = _db.Records.Count(r => r.Status == "Active"),
             ResolvedComplaints = _db.Complaints.Count(c => c.Status == "Reviewed"),
-            PendingApprovals   = _db.Users.Count(u => !u.IsActive &&
+            PendingApprovals  = _db.Users.Count(u => !u.IsActive &&
                                     (u.Role == "Doctor" || u.Role == "Nurse" || u.Role == "Receptionist")),
-            NewComplaints      = _db.Complaints.Count(c => !c.IsRead),
-            DoctorCount        = _db.Users.Count(u => u.Role == "Doctor"       && u.IsActive),
-            NurseCount         = _db.Users.Count(u => u.Role == "Nurse"        && u.IsActive),
+            NewComplaints  = _db.Complaints.Count(c => !c.IsRead),
+            DoctorCount  = _db.Users.Count(u => u.Role == "Doctor" && u.IsActive),
+            NurseCount  = _db.Users.Count(u => u.Role == "Nurse" && u.IsActive),
             ReceptionistCount  = _db.Users.Count(u => u.Role == "Receptionist" && u.IsActive)
         };
 
@@ -182,12 +182,12 @@ namespace MediCore.Services
         public int GetUnreadComplaintCount() =>
             _db.Complaints.Count(c => !c.IsRead);
 
-        public List<AuditEntry> GetAuditEntries(int take = 80)
+        public List<AuditLog> GetAuditEntries(int take = 80)
         {
             return _db.AuditLogs
                       .OrderByDescending(a => a.Timestamp)
                       .Take(take)
-                      .Select(a => new AuditEntry
+                      .Select(a => new AuditLog
                       {
                           Actor     = a.Actor,
                           Action    = a.Action,
@@ -200,22 +200,26 @@ namespace MediCore.Services
 
         public AdminAnalyticsStats GetAnalyticsStats() => new AdminAnalyticsStats
         {
-            TotalPatients      = _db.Patients.Count(),
-            TotalRecords       = _db.Records.Count(),
-            TotalComplaints    = _db.Complaints.Count(),
+            TotalPatients = _db.Patients.Count(),
+            TotalRecords  = _db.Records.Count(),
+            TotalComplaints = _db.Complaints.Count(),
+
             ResolvedComplaints = _db.Complaints.Count(c => c.Status == "Reviewed"),
-            ActiveRecords      = _db.Records.Count(r => r.Status == "Active"),
-            TotalStaff         = _db.Users.Count(u => u.Role != "Patient" && u.IsActive),
-            MaleCount          = _db.Patients.Count(p => p.Gender == "Male"),
-            FemaleCount        = _db.Patients.Count(p => p.Gender == "Female"),
-            OtherGender        = _db.Patients.Count(p => p.Gender != "Male" && p.Gender != "Female"),
-            ActiveComplaints   = _db.Complaints.Count(c => c.Status == "Active"),
+            ActiveRecords = _db.Records.Count(r => r.Status == "Active"),
+            TotalStaff  = _db.Users.Count(u => u.Role != "Patient" && u.IsActive),
+
+            MaleCount = _db.Patients.Count(p => p.Gender == "Male"),
+            FemaleCount = _db.Patients.Count(p => p.Gender == "Female"),
+            OtherGender = _db.Patients.Count(p => p.Gender != "Male" && p.Gender != "Female"),
+
+            ActiveComplaints  = _db.Complaints.Count(c => c.Status == "Active"),
             ReviewedComplaints = _db.Complaints.Count(c => c.Status == "Reviewed"),
-            ClosedComplaints   = _db.Complaints.Count(c => c.Status == "Closed"),
-            DoctorCount        = _db.Users.Count(u => u.Role == "Doctor"       && u.IsActive),
-            NurseCount         = _db.Users.Count(u => u.Role == "Nurse"        && u.IsActive),
+            ClosedComplaints = _db.Complaints.Count(c => c.Status == "Closed"),
+
+            DoctorCount = _db.Users.Count(u => u.Role == "Doctor" && u.IsActive),
+            NurseCount  = _db.Users.Count(u => u.Role == "Nurse" && u.IsActive),
             ReceptionistCount  = _db.Users.Count(u => u.Role == "Receptionist" && u.IsActive),
-            BloodGroups        = _db.Patients
+            BloodGroups = _db.Patients
                                     .Where(p => p.BloodGroup != null)
                                     .GroupBy(p => p.BloodGroup!)
                                     .Select(g => new BloodGroupStat { Group = g.Key, Count = g.Count() })

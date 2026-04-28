@@ -19,16 +19,38 @@
                     <div class="stat-l">Patient #@Model.Id</div>
                 </div>
             </div>
-            <div class="irow"><span class="ilbl">Date of Birth</span><span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span></div>
-            <div class="irow"><span class="ilbl">Gender</span><span>@(Model.Gender ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Blood Group</span>
+            <div class="irow">
+                <span class="ilbl">Date of Birth</span>
+                <span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Gender</span>
+                <span>@(Model.Gender ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Blood Group</span>
                 <span>@(Model.BloodGroup != null ? Model.BloodGroup : "—")</span>
             </div>
-            <div class="irow"><span class="ilbl">Phone</span><span>@(Model.Phone ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Email</span><span>@(Model.Email ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Address</span><span>@(Model.Address ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Emergency Contact</span><span>@(Model.EmergencyContact ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Registered</span><span>@Model.RegisteredOn.ToString("dd MMM yyyy")</span></div>
+            <div class="irow">
+                <span class="ilbl">Phone</span>
+                <span>@(Model.Phone ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Email</span>
+                <span>@(Model.Email ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Address</span>
+                <span>@(Model.Address ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Emergency Contact</span>
+                <span>@(Model.EmergencyContact ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Registered</span>
+                <span>@Model.RegisteredOn.ToString("dd MMM yyyy")</span>
+            </div>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(Model.MedicalHistory))
@@ -65,7 +87,15 @@
                 else
                 {
                     <table class="table mb-0">
-                        <thead><tr><th>Date</th><th>Diagnosis</th><th>Treatment</th><th>Doctor</th><th>Status</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Diagnosis</th>
+                                <th>Treatment</th>
+                                <th>Doctor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
                         <tbody>
                         @foreach (var r in Model.Records.OrderByDescending(r => r.VisitDate))
                         {
@@ -100,7 +130,14 @@
                 else
                 {
                     <table class="table mb-0">
-                        <thead><tr><th>Date</th><th>Description</th><th>Status</th><th>Responded By</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Responded By</th>
+                            </tr>
+                        </thead>
                         <tbody>
                         @foreach (var c in Model.Complaints.OrderByDescending(c => c.SubmittedAt))
                         {

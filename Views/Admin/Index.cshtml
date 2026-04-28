@@ -75,7 +75,7 @@
                         <tr>
                             <td><a href="/Admin/PatientDetail/@p.Id" class="text-decoration-none fw-semibold">@p.FullName</a></td>
                             <td>@(p.Gender ?? "—")</td>
-                            <td>@(p.BloodGroup != null ? $"<span class='pill pill-r'>{p.BloodGroup}</span>" : "—")</td>
+                            <td>@(p.BloodGroup != null ? $"{p.BloodGroup}" : "—")</td>
                             <td style="color:#8faac4;">@p.RegisteredOn.ToString("dd MMM yyyy")</td>
                         </tr>
                     }

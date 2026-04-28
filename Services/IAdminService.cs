@@ -20,7 +20,7 @@ namespace MediCore.Services
         List<Record> GetAllRecords(string? status, string? search);
         List<Complaint> GetAllComplaints(string? status, string? search);
         int GetUnreadComplaintCount();
-        List<AuditEntry> GetAuditEntries(int take = 80);
+        List<AuditLog> GetAuditEntries(int take = 80);
         AdminAnalyticsStats GetAnalyticsStats();
     }
 

@@ -15,7 +15,13 @@
         <div class="card-body p-0">
             <table class="table mb-0">
                 <thead>
-                    <tr><th class="ps-3">Day</th><th>Available</th><th>Start</th><th>End</th><th>Max Slots</th></tr>
+                    <tr>
+                        <th class="ps-3">Day</th>
+                        <th>Available</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Max Slots</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @for (int i = 0; i < Model.Count; i++)
@@ -24,11 +30,11 @@
                         <tr>
                             <td class="ps-3 fw-semibold">@dayNames[i]</td>
                             <td>
-                                <input type="hidden" name="available" id="avail_@i" value="@r.IsAvailable.ToString().ToLower()" />
+                                <input type="hidden" name="days[@i].IsAvailable" id="avail_@i" value="@r.IsAvailable.ToString().ToLower()" />
                                 <input type="checkbox" id="cb_@i" onchange="document.getElementById('avail_@(i)').value = this.checked ? 'true' : 'false'" @(r.IsAvailable ? "checked" : "") />
                             </td>
                             <td>
-                                <select name="startTimes" class="form-select form-select-sm" style="max-width:140px;">
+                                <select name="days[@i].StartTime" class="form-select form-select-sm" style="max-width:140px;">
                                     @foreach (var t in times)
                                     {
                                         if (r.StartTime == t)
@@ -39,7 +45,7 @@
                                 </select>
                             </td>
                             <td>
-                                <select name="endTimes" class="form-select form-select-sm" style="max-width:140px;">
+                                <select name="days[@i].EndTime" class="form-select form-select-sm" style="max-width:140px;">
                                     @foreach (var t in times)
                                     {
                                         if (r.EndTime == t)
@@ -49,7 +55,7 @@
                                     }
                                 </select>
                             </td>
-                            <td><input type="number" name="maxSlots" class="form-control form-control-sm" value="@r.MaxSlots" min="1" max="30" style="max-width:80px;" /></td>
+                            <td><input type="number" name="days[@i].MaxSlots" class="form-control form-control-sm" value="@r.MaxSlots" min="1" max="30" style="max-width:80px;" /></td>
                         </tr>
                     }
                 </tbody>

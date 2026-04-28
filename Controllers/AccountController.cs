@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediCore.Data;
 using MediCore.Models;
 using MediCore.Services;
+using MediCore.ViewModels;
 
 namespace MediCore.Controllers
 {
@@ -12,7 +13,7 @@ namespace MediCore.Controllers
 
         public AccountController(AppDbContext db, IAuditService audit)
         {
-            _db    = db;
+            _db = db;
             _audit = audit;
         }
 
@@ -47,11 +48,15 @@ namespace MediCore.Controllers
             }
 
             HttpContext.Session.SetString("UserName", user.FullName);
-            HttpContext.Session.SetString("UserRole",  user.Role);
-            HttpContext.Session.SetInt32("UserId",     user.Id);
+            HttpContext.Session.SetString("UserRole", user.Role);
+            HttpContext.Session.SetInt32("UserId", user.Id);
 
-            if (user.PatientId.HasValue)
-                HttpContext.Session.SetInt32("PatientId", user.PatientId.Value);
+            if (user.Role == "Patient")
+            {
+                var patient = _db.Patients.FirstOrDefault(p => p.UserId == user.Id);
+                if (patient != null)
+                    HttpContext.Session.SetInt32("PatientId", patient.Id);
+            }
 
             if (user.Role == "Patient")
                 return RedirectToAction("Dashboard", "Patient");
@@ -74,55 +79,63 @@ namespace MediCore.Controllers
         public IActionResult Register() => View();
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult Register(string fullName, string email,
-                                      string password, string confirmPassword, string role, string? phone = null)
+        public IActionResult Register(RegisterViewModel input)
         {
-            if (password != confirmPassword)
+            if (input.Password != input.ConfirmPassword)
             { ViewBag.Error = "Passwords do not match."; return View(); }
 
-            if (_db.Users.Any(u => u.Email == email))
+            if (_db.Users.Any(u => u.Email == input.Email))
             { ViewBag.Error = "Email already registered."; return View(); }
 
-            if (role == "Admin")
+            if (input.Role == "Admin")
             {
                 ViewBag.Error = "Cannot register as Admin. An administrator must create admin accounts.";
                 return View();
             }
 
-            int? patientId = null;
-            if (role == "Patient")
+            var isStaffRole = input.Role == "Doctor" || input.Role == "Nurse" || input.Role == "Receptionist";
+
+            var newUser = new User
             {
-                var linked = _db.Patients.FirstOrDefault(p => p.Email == email);
+                FullName = input.FullName,
+                Email = input.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(input.Password),
+                Role = input.Role,
+                Phone = input.Phone,
+                IsActive = !isStaffRole
+            };
+            _db.Users.Add(newUser);
+            _db.SaveChanges();
+
+            if (input.Role == "Patient")
+            {
+                var linked = _db.Patients.FirstOrDefault(p => p.Email == input.Email);
                 if (linked != null)
                 {
-                    patientId = linked.Id;
+                    linked.UserId = newUser.Id;
                 }
                 else
                 {
-                    var np = new Patient { FullName = fullName, Email = email, RegisteredOn = DateTime.Now };
-                    _db.Patients.Add(np);
-                    _db.SaveChanges();
-                    patientId = np.Id;
+                    _db.Patients.Add(new Patient
+                    {
+                        FullName = input.FullName,
+                        Phone = input.Phone,
+                        Email = input.Email,
+                        UserId = newUser.Id,
+                        RegisteredOn = DateTime.Now
+                    });
                 }
+                _db.SaveChanges();
             }
 
-            var isStaffRole = role == "Doctor" || role == "Nurse" || role == "Receptionist";
-
-            _db.Users.Add(new User
+            _audit.Log(new AuditLog
             {
-                FullName     = fullName,
-                Email        = email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                Role         = role,
-                Phone        = phone,
-                PatientId    = patientId,
-                IsActive     = !isStaffRole
+                Actor    = input.FullName,
+                Action   = isStaffRole ? "Registration Pending" : "Account Created / Approved",
+                Target   = $"{input.Role} — {input.Email}",
+                Category = "User",
+                UserId   = newUser.Id
             });
-            _db.SaveChanges();
-
-            _audit.Log(fullName,
-                       isStaffRole ? "Registration Pending" : "Account Created / Approved",
-                       $"{role} — {email}", "User", null);
 
             if (isStaffRole)
             {

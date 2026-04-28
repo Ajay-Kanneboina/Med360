@@ -1,7 +1,7 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Audit Log";
-    var entries = ViewBag.Entries as List<MediCore.Models.AuditEntry> ?? new List<MediCore.Models.AuditEntry>();
+    var entries = ViewBag.Entries as List<MediCore.Models.AuditLog> ?? new List<MediCore.Models.AuditLog>();
 }
 
 <p class="page-s">Immutable activity trail — all significant actions in the system.</p>
@@ -20,7 +20,13 @@
         {
             <table class="table mb-0">
                 <thead>
-                    <tr><th>Timestamp</th><th>Category</th><th>Actor</th><th>Action</th><th>Target</th></tr>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Category</th>
+                        <th>Actor</th>
+                        <th>Action</th>
+                        <th>Target</th>
+                    </tr>
                 </thead>
                 <tbody>
                 @foreach (var e in entries)
@@ -28,10 +34,10 @@
                     <tr>
                         <td style="color:#8faac4;white-space:nowrap;">@e.Timestamp.ToString("dd MMM yyyy HH:mm")</td>
                         <td>
-                            @if (e.Category == "User")          { <span class="pill" style="background:#ede9fe;color:#5b21b6;">User</span> }
-                            else if (e.Category == "Record")    { <span class="pill pill-r">Record</span> }
+                            @if (e.Category == "User") { <span class="pill" style="background:#ede9fe;color:#5b21b6;">User</span> }
+                            else if (e.Category == "Record") { <span class="pill pill-r">Record</span> }
                             else if (e.Category == "Complaint") { <span class="pill pill-a">Complaint</span> }
-                            else                                { <span class="pill pill-x">@e.Category</span> }
+                            else { <span class="pill pill-x">@e.Category</span> }
                         </td>
                         <td class="fw-semibold">@e.Actor</td>
                         <td>@e.Action</td>

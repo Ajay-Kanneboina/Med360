@@ -19,9 +19,9 @@
 </div>
 
 <div class="mb-3 d-flex gap-2">
-    <a href="/Doctor/Complaints"                class="btn btn-sm @(filter == "all"      ? "btn-primary" : "btn-outline-secondary")">All</a>
-    <a href="/Doctor/Complaints?filter=unread"  class="btn btn-sm @(filter == "unread"   ? "btn-primary" : "btn-outline-secondary")">Unread</a>
-    <a href="/Doctor/Complaints?filter=active"  class="btn btn-sm @(filter == "active"   ? "btn-primary" : "btn-outline-secondary")">Active</a>
+    <a href="/Doctor/Complaints" class="btn btn-sm @(filter == "all" ? "btn-primary" : "btn-outline-secondary")">All</a>
+    <a href="/Doctor/Complaints?filter=unread" class="btn btn-sm @(filter == "unread" ? "btn-primary" : "btn-outline-secondary")">Unread</a>
+    <a href="/Doctor/Complaints?filter=active" class="btn btn-sm @(filter == "active" ? "btn-primary" : "btn-outline-secondary")">Active</a>
     <a href="/Doctor/Complaints?filter=reviewed"class="btn btn-sm @(filter == "reviewed" ? "btn-primary" : "btn-outline-secondary")">Reviewed</a>
 </div>
 
@@ -64,9 +64,9 @@
                             <td class="text-muted">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
                             <td class="text-muted">@c.UpdatedAt.ToString("dd MMM, hh:mm tt")</td>
                             <td>
-                                @if (c.Status == "Active")          { <span class="pill pill-a">@c.Status</span> }
-                                else if (c.Status == "Reviewed")    { <span class="pill pill-r">@c.Status</span> }
-                                else                                { <span class="pill pill-d">@c.Status</span> }
+                                @if (c.Status == "Active") { <span class="pill pill-a">@c.Status</span> }
+                                else if (c.Status == "Reviewed") { <span class="pill pill-r">@c.Status</span> }
+                                else { <span class="pill pill-d">@c.Status</span> }
                             </td>
                             <td>
                                 <a href="/Doctor/ViewComplaint/@c.Id"

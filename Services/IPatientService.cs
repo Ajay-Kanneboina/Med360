@@ -9,20 +9,11 @@ namespace MediCore.Services
         Record? GetMyRecord(int recordId, int patientId);
 
         List<Complaint> GetMyComplaints(int patientId);
-        Complaint SubmitComplaint(int patientId, string description, string? additionalNotes);
-        bool UpdateComplaint(int complaintId, int patientId,
-                             string description, string? additionalNotes);
+        Complaint SubmitComplaint(int patientId, Complaint data);
+        bool UpdateComplaint(int complaintId, int patientId, Complaint data);
 
         Patient? GetMyProfile(int patientId);
-        bool UpdateProfile(int patientId,
-                           string?   phone,
-                           string?   email,
-                           string?   address,
-                           string?   emergencyContact,
-                           DateTime? dateOfBirth,
-                           string?   gender,
-                           string?   bloodGroup,
-                           string?   medicalHistory);
+        bool UpdateProfile(int patientId, Patient data);
     }
 
     public class PatientRecordStats

@@ -36,18 +36,18 @@ namespace MediCore.Services
             return AllSlots.Where(s => !booked.Contains(s)).ToList();
         }
 
-        public Appointment? BookAppointment(int patientId, int doctorId, DateTime date, string timeSlot, string? notes)
+        public Appointment? BookAppointment(Appointment data)
         {
             bool conflict = _db.Appointments.Any(a =>
-                a.DoctorId == doctorId && a.AppointmentDate.Date == date.Date &&
-                a.TimeSlot == timeSlot && a.Status != "Cancelled");
+                a.DoctorId == data.DoctorId && a.AppointmentDate.Date == data.AppointmentDate.Date &&
+                a.TimeSlot == data.TimeSlot && a.Status != "Cancelled");
             if (conflict) return null;
 
             var appt = new Appointment
             {
-                PatientId = patientId, DoctorId = doctorId,
-                AppointmentDate = date.Date, TimeSlot = timeSlot,
-                Notes = notes, Status = "Scheduled",
+                PatientId = data.PatientId, DoctorId = data.DoctorId,
+                AppointmentDate = data.AppointmentDate.Date, TimeSlot = data.TimeSlot,
+                Notes = data.Notes, Status = "Scheduled",
                 CreatedAt = DateTime.Now, UpdatedAt = DateTime.Now
             };
             _db.Appointments.Add(appt);
@@ -58,8 +58,11 @@ namespace MediCore.Services
         public List<Appointment> GetAllAppointments(string? status, string? search, DateTime? date)
         {
             var q = _db.Appointments.Include(a => a.Patient).Include(a => a.Doctor).AsQueryable();
+
             if (!string.IsNullOrWhiteSpace(status)) q = q.Where(a => a.Status == status);
+
             if (date.HasValue) q = q.Where(a => a.AppointmentDate.Date == date.Value.Date);
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var s = search.ToLower();
@@ -71,8 +74,8 @@ namespace MediCore.Services
 
         public AppointmentStats GetStats() => new AppointmentStats
         {
-            Total     = _db.Appointments.Count(),
-            Today     = _db.Appointments.Count(a => a.AppointmentDate.Date == DateTime.Today),
+            Total = _db.Appointments.Count(),
+            Today = _db.Appointments.Count(a => a.AppointmentDate.Date == DateTime.Today),
             Scheduled = _db.Appointments.Count(a => a.Status == "Scheduled" || a.Status == "Confirmed"),
             Completed = _db.Appointments.Count(a => a.Status == "Completed"),
             Cancelled = _db.Appointments.Count(a => a.Status == "Cancelled")
@@ -82,6 +85,7 @@ namespace MediCore.Services
         {
             var q = _db.Appointments.Include(a => a.Patient).Where(a => a.DoctorId == doctorUserId).AsQueryable();
             if (!string.IsNullOrWhiteSpace(status)) q = q.Where(a => a.Status == status);
+
             return q.OrderBy(a => a.AppointmentDate).ThenBy(a => a.TimeSlot).ToList();
         }
 
@@ -94,6 +98,7 @@ namespace MediCore.Services
         {
             var a = _db.Appointments.Find(id);
             if (a == null) return null;
+
             a.Status = newStatus; a.UpdatedAt = DateTime.Now;
             _db.SaveChanges(); return a;
         }
@@ -102,6 +107,7 @@ namespace MediCore.Services
         {
             var a = _db.Appointments.Find(id);
             if (a == null) return null;
+
             a.Status = "Cancelled"; a.CancelReason = reason; a.UpdatedAt = DateTime.Now;
             _db.SaveChanges(); return a;
         }
@@ -113,21 +119,25 @@ namespace MediCore.Services
         {
             var existing = _db.DoctorAvailabilities.Where(d => d.DoctorId == doctorUserId);
             _db.DoctorAvailabilities.RemoveRange(existing);
-            foreach (var s in slots) { s.DoctorId = doctorUserId; _db.DoctorAvailabilities.Add(s); }
+
+            foreach (var s in slots) 
+            { 
+                s.DoctorId = doctorUserId; 
+                _db.DoctorAvailabilities.Add(s);
+            }
             _db.SaveChanges();
         }
 
-        public AppointmentRequest SendRequest(int patientId, string message,
-                                              string? preferredDate, string? preferredTime)
+        public AppointmentRequest SendRequest(int patientId, AppointmentRequest data)
         {
             var req = new AppointmentRequest
             {
-                PatientId     = patientId,
-                Message       = message,
-                PreferredDate = preferredDate,
-                PreferredTime = preferredTime,
-                IsHandled     = false,
-                SentAt        = DateTime.Now
+                PatientId = patientId,
+                Message  = data.Message,
+                PreferredDate = data.PreferredDate,
+                PreferredTime = data.PreferredTime,
+                IsHandled = false,
+                SentAt = DateTime.Now
             };
             _db.AppointmentRequests.Add(req);
             _db.SaveChanges();
@@ -151,6 +161,7 @@ namespace MediCore.Services
         {
             var req = _db.AppointmentRequests.Find(requestId);
             if (req == null) return false;
+
             req.IsHandled = true;
             _db.SaveChanges();
             return true;

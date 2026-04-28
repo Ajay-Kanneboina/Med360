@@ -1,10 +1,10 @@
 @model MediCore.Models.Complaint
 @{
     ViewData["Title"] = "View Complaint";
-    var pat           = Model.Patient;
-    bool isActive     = Model.Status == "Active";
-    bool isReviewed   = Model.Status == "Reviewed";
-    bool isResolved   = Model.Status == "Resolved";
+    var pat = Model.Patient;
+    bool isActive = Model.Status == "Active";
+    bool isReviewed = Model.Status == "Reviewed";
+    bool isResolved = Model.Status == "Resolved";
 }
 
 <div class="d-flex justify-content-between align-items-start mb-3">
@@ -62,7 +62,7 @@
                 <input type="hidden" name="id" value="@Model.Id" />
                 <div class="mb-3">
                     <label class="form-label">Your Response</label>
-                    <textarea name="response" class="form-control" rows="5" required>@Model.DoctorResponse</textarea>
+                    <textarea name="doctorResponse" class="form-control" rows="5" required>@Model.DoctorResponse</textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Update Status</label>

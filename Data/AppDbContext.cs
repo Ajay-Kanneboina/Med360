@@ -7,14 +7,14 @@ namespace MediCore.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<User>               Users                { get; set; }
-        public DbSet<Patient>            Patients             { get; set; }
-        public DbSet<Complaint>          Complaints           { get; set; }
-        public DbSet<Record>             Records              { get; set; }
-        public DbSet<AuditLog>           AuditLogs            { get; set; }
-        public DbSet<Appointment>        Appointments         { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<Complaint> Complaints { get; set; }
+        public DbSet<Record> Records { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
         public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; }
-        public DbSet<AppointmentRequest> AppointmentRequests  { get; set; }
+        public DbSet<AppointmentRequest> AppointmentRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder m)
         {
@@ -55,6 +55,12 @@ namespace MediCore.Data
                 .WithMany()
                 .HasForeignKey(r => r.PatientId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            m.Entity<Patient>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

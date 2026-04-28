@@ -1,20 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
+using MediCore.Models;
 using MediCore.Services;
 
 namespace MediCore.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly IAdminService       _adminService;
-        private readonly IAuditService       _audit;
+        private readonly IAdminService _adminService;
+        private readonly IAuditService _audit;
         private readonly IAppointmentService _apptService;
 
-        public AdminController(IAdminService adminService, IAuditService audit,
-                               IAppointmentService apptService)
+        public AdminController(IAdminService adminService, IAuditService audit, IAppointmentService apptService)
         {
             _adminService = adminService;
-            _audit        = audit;
-            _apptService  = apptService;
+            _audit = audit;
+            _apptService = apptService;
         }
 
         private bool IsAdmin() =>
@@ -23,7 +23,7 @@ namespace MediCore.Controllers
         private void SetSidebarBag()
         {
             var stats = _adminService.GetDashboardStats();
-            ViewBag.NewComplaints    = stats.NewComplaints;
+            ViewBag.NewComplaints = stats.NewComplaints;
             ViewBag.PendingApprovals = stats.PendingApprovals;
         }
 
@@ -33,16 +33,16 @@ namespace MediCore.Controllers
             SetSidebarBag();
 
             var stats = _adminService.GetDashboardStats();
-            ViewBag.TotalPatients      = stats.TotalPatients;
-            ViewBag.TotalRecords       = stats.TotalRecords;
-            ViewBag.TotalComplaints    = stats.TotalComplaints;
-            ViewBag.ActiveRecords      = stats.ActiveRecords;
+            ViewBag.TotalPatients = stats.TotalPatients;
+            ViewBag.TotalRecords = stats.TotalRecords;
+            ViewBag.TotalComplaints = stats.TotalComplaints;
+            ViewBag.ActiveRecords = stats.ActiveRecords;
             ViewBag.ResolvedComplaints = stats.ResolvedComplaints;
-            ViewBag.DoctorCount        = stats.DoctorCount;
-            ViewBag.NurseCount         = stats.NurseCount;
-            ViewBag.ReceptionistCount  = stats.ReceptionistCount;
+            ViewBag.DoctorCount = stats.DoctorCount;
+            ViewBag.NurseCount = stats.NurseCount;
+            ViewBag.ReceptionistCount = stats.ReceptionistCount;
 
-            ViewBag.RecentPatients   = _adminService.GetRecentPatients();
+            ViewBag.RecentPatients = _adminService.GetRecentPatients();
             ViewBag.RecentComplaints = _adminService.GetRecentComplaints();
 
             return View();
@@ -51,6 +51,7 @@ namespace MediCore.Controllers
         public IActionResult PendingUsers()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
             SetSidebarBag();
 
             return View(_adminService.GetPendingUsers());
@@ -65,7 +66,14 @@ namespace MediCore.Controllers
             if (user == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "Account Approved", $"{user.Role} — {user.Email}", "User", HttpContext.Session.GetInt32("UserId"));
+            _audit.Log(new AuditLog
+            {
+                Actor    = admin,
+                Action   = "Account Approved",
+                Target   = $"{user.Role} — {user.Email}",
+                Category = "User",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = $"{user.FullName} has been approved and can now log in.";
             return RedirectToAction(nameof(PendingUsers));
@@ -80,7 +88,14 @@ namespace MediCore.Controllers
             if (name == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "Account Rejected", name, "User", HttpContext.Session.GetInt32("UserId"));
+            _audit.Log(new AuditLog
+            {
+                Actor    = admin,
+                Action   = "Account Rejected",
+                Target   = name,
+                Category = "User",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = "User registration rejected and removed.";
             return RedirectToAction(nameof(PendingUsers));
@@ -91,7 +106,7 @@ namespace MediCore.Controllers
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
             SetSidebarBag();
 
-            ViewBag.RoleFilter   = role   ?? "";
+            ViewBag.RoleFilter = role   ?? "";
             ViewBag.SearchFilter = search ?? "";
 
             return View(_adminService.GetAllStaff(role, search));
@@ -106,7 +121,14 @@ namespace MediCore.Controllers
             if (user == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, user.IsActive ? "User Activated" : "User Deactivated", $"{user.Role} — {user.Email}", "User", HttpContext.Session.GetInt32("UserId"));
+            _audit.Log(new AuditLog
+            {
+                Actor    = admin,
+                Action   = user.IsActive ? "User Activated" : "User Deactivated",
+                Target   = $"{user.Role} — {user.Email}",
+                Category = "User",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = $"{user.FullName} is now {(user.IsActive ? "active" : "deactivated")}.";
             return RedirectToAction(nameof(AllUsers));
@@ -121,7 +143,14 @@ namespace MediCore.Controllers
             if (name == null) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "User Deleted", name, "User", HttpContext.Session.GetInt32("UserId"));
+            _audit.Log(new AuditLog
+            {
+                Actor    = admin,
+                Action   = "User Deleted",
+                Target   = name,
+                Category = "User",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = "User deleted permanently.";
             return RedirectToAction(nameof(AllUsers));
@@ -156,10 +185,18 @@ namespace MediCore.Controllers
 
             var patient = _adminService.GetPatientDetail(id);
             if (patient == null) return NotFound();
+
             if (!_adminService.DeletePatient(id)) return NotFound();
 
             var admin = HttpContext.Session.GetString("UserName") ?? "Admin";
-            _audit.Log(admin, "Patient Deleted", patient.FullName, "User", HttpContext.Session.GetInt32("UserId"));
+            _audit.Log(new AuditLog
+            {
+                Actor    = admin,
+                Action   = "Patient Deleted",
+                Target   = patient.FullName,
+                Category = "User",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = "Patient and all associated records removed.";
             return RedirectToAction(nameof(AllPatients));
@@ -183,7 +220,7 @@ namespace MediCore.Controllers
 
             ViewBag.StatusFilter = status ?? "";
             ViewBag.SearchFilter = search ?? "";
-            ViewBag.UnreadCount  = _adminService.GetUnreadComplaintCount();
+            ViewBag.UnreadCount = _adminService.GetUnreadComplaintCount();
 
             return View(_adminService.GetAllComplaints(status, search));
         }
@@ -205,10 +242,10 @@ namespace MediCore.Controllers
             DateTime? dateFilter = null;
             if (DateTime.TryParse(date, out var d)) dateFilter = d;
 
-            ViewBag.Stats        = _apptService.GetStats();
+            ViewBag.Stats = _apptService.GetStats();
             ViewBag.StatusFilter = status ?? "";
             ViewBag.SearchFilter = search ?? "";
-            ViewBag.DateFilter   = date   ?? "";
+            ViewBag.DateFilter = date   ?? "";
 
             return View(_apptService.GetAllAppointments(status, search, dateFilter));
         }
@@ -220,22 +257,22 @@ namespace MediCore.Controllers
 
             var stats = _adminService.GetAnalyticsStats();
 
-            ViewBag.TotalPatients      = stats.TotalPatients;
-            ViewBag.TotalRecords       = stats.TotalRecords;
-            ViewBag.TotalComplaints    = stats.TotalComplaints;
+            ViewBag.TotalPatients = stats.TotalPatients;
+            ViewBag.TotalRecords = stats.TotalRecords;
+            ViewBag.TotalComplaints = stats.TotalComplaints;
             ViewBag.ResolvedComplaints = stats.ResolvedComplaints;
-            ViewBag.ActiveRecords      = stats.ActiveRecords;
-            ViewBag.TotalStaff         = stats.TotalStaff;
-            ViewBag.MaleCount          = stats.MaleCount;
-            ViewBag.FemaleCount        = stats.FemaleCount;
-            ViewBag.OtherGender        = stats.OtherGender;
-            ViewBag.ActiveComplaints   = stats.ActiveComplaints;
+            ViewBag.ActiveRecords = stats.ActiveRecords;
+            ViewBag.TotalStaff = stats.TotalStaff;
+            ViewBag.MaleCount  = stats.MaleCount;
+            ViewBag.FemaleCount = stats.FemaleCount;
+            ViewBag.OtherGender = stats.OtherGender;
+            ViewBag.ActiveComplaints = stats.ActiveComplaints;
             ViewBag.ReviewedComplaints = stats.ReviewedComplaints;
             ViewBag.ClosedComplaints   = stats.ClosedComplaints;
-            ViewBag.DoctorCount        = stats.DoctorCount;
-            ViewBag.NurseCount         = stats.NurseCount;
+            ViewBag.DoctorCount = stats.DoctorCount;
+            ViewBag.NurseCount  = stats.NurseCount;
             ViewBag.ReceptionistCount  = stats.ReceptionistCount;
-            ViewBag.BloodGroups        = stats.BloodGroups;
+            ViewBag.BloodGroups = stats.BloodGroups;
 
             return View();
         }

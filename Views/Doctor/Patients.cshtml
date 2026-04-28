@@ -4,7 +4,7 @@
     ViewData["Title"] = "Patients";
     string search = ViewBag.Search ?? "";
     string gender = ViewBag.Gender ?? "";
-    string blood  = ViewBag.Blood  ?? "";
+    string blood = ViewBag.Blood  ?? "";
     var bloodGroups = ViewBag.BloodGroups as List<string> ?? new List<string>();
 }
 
@@ -20,9 +20,9 @@
             <label class="form-label">Gender</label>
             <select name="gender" class="form-select">
                 <option value="">All</option>
-                <option value="Male"   selected="@(gender=="Male"   ? "selected" : null)">Male</option>
+                <option value="Male" selected="@(gender=="Male"   ? "selected" : null)">Male</option>
                 <option value="Female" selected="@(gender=="Female" ? "selected" : null)">Female</option>
-                <option value="Other"  selected="@(gender=="Other"  ? "selected" : null)">Other</option>
+                <option value="Other" selected="@(gender=="Other"  ? "selected" : null)">Other</option>
             </select>
         </div>
         <div class="col-md-2">
@@ -57,7 +57,17 @@
         {
             <table class="table mb-0">
                 <thead>
-                    <tr><th>Name</th><th>DOB</th><th>Gender</th><th>Blood</th><th>Phone</th><th>Records</th><th>Open Complaints</th><th>Registered</th><th></th></tr>
+                    <tr>
+                        <th>Name</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Blood</th>
+                        <th>Phone</th>
+                        <th>Records</th>
+                        <th>Open Complaints</th>
+                        <th>Registered</th>
+                        <th></th>
+                    </tr>
                 </thead>
                 <tbody>
                 @foreach (var p in Model)

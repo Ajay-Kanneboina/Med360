@@ -1,10 +1,10 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Book Appointment";
-    var patients  = ViewBag.Patients  as List<MediCore.Models.Patient> ?? new();
-    var doctors   = ViewBag.Doctors   as List<MediCore.Models.User>    ?? new();
+    var patients = ViewBag.Patients  as List<MediCore.Models.Patient> ?? new();
+    var doctors = ViewBag.Doctors as List<MediCore.Models.User> ?? new();
     var requestId = ViewBag.RequestId as int?;
-    var selPat    = ViewBag.SelectedPatient as int?;
+    var selPat = ViewBag.SelectedPatient as int?;
 }
 
 <p class="page-s">Book an appointment for a patient with a doctor.</p>
@@ -80,16 +80,16 @@
 
 <script>
     const doctorSel = document.getElementById('doctorSelect');
-    const dateSel   = document.getElementById('apptDate');
-    const slotSel   = document.getElementById('slotSelect');
+    const dateSel = document.getElementById('apptDate');
+    const slotSel = document.getElementById('slotSelect');
 
     async function loadSlots() {
         const doctorId = doctorSel.value;
-        const date     = dateSel.value;
+        const date = dateSel.value;
         if (!doctorId || !date) return;
 
         slotSel.innerHTML = '<option>Loading…</option>';
-        const res   = await fetch(`/Receptionist/GetSlots?doctorId=${doctorId}&date=${date}`);
+        const res = await fetch(`/Receptionist/GetSlots?doctorId=${doctorId}&date=${date}`);
         const slots = await res.json();
 
         if (slots.length === 0) {

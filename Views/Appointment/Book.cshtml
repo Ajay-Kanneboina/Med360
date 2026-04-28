@@ -4,31 +4,70 @@
     var doctors = ViewBag.Doctors as List<User> ?? new();
 }
 <p class="page-s">Schedule a new appointment</p>
-<div class="card" style="max-width:640px;"><div class="card-header"><i class="bi bi-calendar2-plus me-2"></i>New Appointment</div>
+<div class="card" style="max-width:640px;">
+    <div class="card-header">
+        <i class="bi bi-calendar2-plus me-2"></i>New Appointment
+    </div>
 <div class="card-body">
 <form method="post" action="/Appointment/Book" id="bookForm">@Html.AntiForgeryToken()
     <div class="row g-3 mb-3">
-        <div class="col-md-6"><label class="form-label">Patient *</label>
+        <div class="col-md-6">
+            <label class="form-label">Patient *</label>
             <select name="patientId" class="form-select form-select-sm" required><option value="">— Select —</option>
-            @foreach (var p in patients) { <option value="@p.Id">@p.FullName</option> }</select></div>
-        <div class="col-md-6"><label class="form-label">Doctor *</label>
+            @foreach (var p in patients) { <option value="@p.Id">@p.FullName</option> }</select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Doctor *</label>
             <select name="doctorId" id="docSel" class="form-select form-select-sm" required><option value="">— Select —</option>
-            @foreach (var d in doctors) { <option value="@d.Id">Dr. @d.FullName</option> }</select></div>
+            @foreach (var d in doctors) { <option value="@d.Id">Dr. @d.FullName</option> }</select>
+        </div>
     </div>
-    <div class="mb-3"><label class="form-label">Date *</label>
-        <input type="date" name="appointmentDate" id="dateSel" class="form-control form-control-sm" min="@DateTime.Today.ToString("yyyy-MM-dd")" required style="max-width:200px;"/></div>
-    <div class="mb-3"><label class="form-label">Time Slot *</label><input type="hidden" name="timeSlot" id="slotVal"/>
-        <div id="slotGrid" class="d-flex flex-wrap gap-2"><span class="text-muted small">Pick doctor &amp; date first</span></div></div>
-    <div class="mb-3"><label class="form-label">Notes</label>
-        <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Reason for visit…"></textarea></div>
+    <div class="mb-3">
+        <label class="form-label">Date *</label>
+        <input type="date" name="appointmentDate" id="dateSel" class="form-control form-control-sm" min="@DateTime.Today.ToString("yyyy-MM-dd")" required style="max-width:200px;"/>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Time Slot *</label>
+        <input type="hidden" name="timeSlot" id="slotVal"/>
+        <div id="slotGrid" class="d-flex flex-wrap gap-2">
+            <span class="text-muted small">Pick doctor &amp; date first</span>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Reason for visit…"></textarea>
+    </div>
     <button type="submit" class="btn btn-primary" id="subBtn" disabled><i class="bi bi-check-lg me-1"></i>Book</button>
     <a href="/Appointment/Index" class="btn btn-outline-secondary ms-2">Cancel</a>
-</form></div></div>
+</form>
+</div>
+</div>
+
 <script>
-var ds=document.getElementById('docSel'),dt=document.getElementById('dateSel'),sg=document.getElementById('slotGrid'),sv=document.getElementById('slotVal'),sb=document.getElementById('subBtn');
-function load(){var d=ds.value,t=dt.value;if(!d||!t)return;sg.innerHTML='<span class="text-muted small">Loading…</span>';sv.value='';sb.disabled=true;
-fetch('/Appointment/GetSlots?doctorId='+d+'&date='+t).then(r=>r.json()).then(s=>{if(!s.length){sg.innerHTML='<span class="text-danger small">No slots available</span>';return;}
-sg.innerHTML='';s.forEach(x=>{var b=document.createElement('button');b.type='button';b.className='btn btn-sm btn-outline-secondary';b.textContent=x;
-b.onclick=function(){sg.querySelectorAll('button').forEach(e=>e.classList.remove('btn-primary','text-white'));b.classList.add('btn-primary','text-white');sv.value=x;sb.disabled=false;};sg.appendChild(b);});});}
+var ds=document.getElementById('docSel');
+var dt=document.getElementById('dateSel');
+var sg=document.getElementById('slotGrid');
+var sv=document.getElementById('slotVal');
+var sb=document.getElementById('subBtn');
+
+function load(){
+    var d=ds.value,t=dt.value;
+    if(!d||!t)  return;
+    sg.innerHTML='<span class="text-muted small">Loading…</span>';
+    sv.value='';
+    sb.disabled=true;
+    fetch('/Appointment/GetSlots?doctorId='+d+'&date='+t).then(r=>r.json())
+    .then(s=>{if(!s.length){sg.innerHTML='<span class="text-danger small">No slots available</span>';
+    return;}
+    sg.innerHTML='';
+    s.forEach(x=>{var b=document.createElement('button');
+    b.type='button';
+    b.className='btn btn-sm btn-outline-secondary';
+    b.textContent=x;
+    b.onclick=function(){sg.querySelectorAll('button').forEach(e=>e.classList.remove('btn-primary','text-white'));
+    b.classList.add('btn-primary','text-white');
+    sv.value=x;sb.disabled=false;};
+    sg.appendChild(b);});});
+}
 ds.onchange=load;dt.onchange=load;
 </script>

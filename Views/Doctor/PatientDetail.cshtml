@@ -17,9 +17,24 @@
 </div>
 
 <div class="row g-2 mb-3">
-    <div class="col-4"><div class="stat"><div class="stat-n" style="color:#166534;">@activeRec</div><div class="stat-l">Active Records</div></div></div>
-    <div class="col-4"><div class="stat"><div class="stat-n" style="color:#475569;">@closedRec</div><div class="stat-l">Archived</div></div></div>
-    <div class="col-4"><div class="stat"><div class="stat-n" style="color:#b45309;">@openComp</div><div class="stat-l">Open Complaints</div></div></div>
+    <div class="col-4">
+        <div class="stat">
+            <div class="stat-n" style="color:#166534;">@activeRec</div>
+            <div class="stat-l">Active Records</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="stat">
+            <div class="stat-n" style="color:#475569;">@closedRec</div>
+            <div class="stat-l">Archived</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="stat">
+            <div class="stat-n" style="color:#b45309;">@openComp</div>
+            <div class="stat-l">Open Complaints</div>
+        </div>
+    </div>
 </div>
 
 <div class="row g-3 mb-3">
@@ -35,16 +50,38 @@
                     <div class="stat-l">Patient #@Model.Id</div>
                 </div>
             </div>
-            <div class="irow"><span class="ilbl">Date of Birth</span><span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span></div>
-            <div class="irow"><span class="ilbl">Gender</span><span>@(Model.Gender ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Blood Group</span>
+            <div class="irow">
+                <span class="ilbl">Date of Birth</span>
+                <span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Gender</span>
+                <span>@(Model.Gender ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Blood Group</span>
                 <span>@(Model.BloodGroup != null ? Model.BloodGroup : "—")</span>
             </div>
-            <div class="irow"><span class="ilbl">Phone</span><span>@(Model.Phone ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Email</span><span style="font-size:.82rem;">@(Model.Email ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Address</span><span>@(Model.Address ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Emergency</span><span style="font-size:.82rem;">@(Model.EmergencyContact ?? "—")</span></div>
-            <div class="irow"><span class="ilbl">Registered</span><span>@Model.RegisteredOn.ToString("dd MMM yyyy")</span></div>
+            <div class="irow">
+                <span class="ilbl">Phone</span>
+                <span>@(Model.Phone ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Email</span>
+                <span style="font-size:.82rem;">@(Model.Email ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Address</span>
+                <span>@(Model.Address ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Emergency</span>
+                <span style="font-size:.82rem;">@(Model.EmergencyContact ?? "—")</span>
+            </div>
+            <div class="irow">
+                <span class="ilbl">Registered</span>
+                <span>@Model.RegisteredOn.ToString("dd MMM yyyy")</span>
+            </div>
         </div>
 
         <div class="sbox">
@@ -132,9 +169,10 @@
                                 <td style="color:#8faac4;white-space:nowrap;">@c.SubmittedAt.ToString("dd MMM yyyy")</td>
                                 <td>@(c.Description.Length > 65 ? c.Description[..65] + "…" : c.Description)</td>
                                 <td>
-                                    @if (!c.IsRead)               { <span class="pill" style="background:#fee2e2;color:#991b1b;">Unread</span> }
-                                    else if (c.Status=="Reviewed"){ <span class="pill pill-d">Reviewed</span> }
-                                    else                          { <span class="pill pill-a">Active</span> }
+                                    @if (!c.IsRead)                  { <span class="pill" style="background:#fee2e2;color:#991b1b;">Unread</span> }
+                                    else if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
+                                    else if (c.Status == "Resolved") { <span class="pill pill-x">Resolved</span> }
+                                    else                             { <span class="pill pill-a">Active</span> }
                                 </td>
                                 <td><a href="/Doctor/ViewComplaint/@c.Id" class="btn btn-sm btn-outline-primary">View</a></td>
                             </tr>

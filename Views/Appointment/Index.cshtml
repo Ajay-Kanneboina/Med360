@@ -9,10 +9,30 @@
 <p class="page-s">Manage all patient-doctor appointments</p>
 
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3"><div class="stat"><div class="stat-n text-primary">@(stats?.Total ?? 0)</div><div class="stat-l"><i class="bi bi-calendar2 me-1"></i>Total</div></div></div>
-    <div class="col-6 col-md-3"><div class="stat"><div class="stat-n" style="color:#065f46;">@(stats?.Today ?? 0)</div><div class="stat-l"><i class="bi bi-calendar-check me-1"></i>Today</div></div></div>
-    <div class="col-6 col-md-3"><div class="stat"><div class="stat-n" style="color:#1d4ed8;">@(stats?.Scheduled ?? 0)</div><div class="stat-l"><i class="bi bi-clock me-1"></i>Upcoming</div></div></div>
-    <div class="col-6 col-md-3"><div class="stat"><div class="stat-n text-danger">@(stats?.Cancelled ?? 0)</div><div class="stat-l"><i class="bi bi-x-circle me-1"></i>Cancelled</div></div></div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n text-primary">@(stats?.Total ?? 0)</div>
+            <div class="stat-l"><i class="bi bi-calendar2 me-1"></i>Total</div>
+        </div>
+     </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#065f46;">@(stats?.Today ?? 0)</div>
+            <div class="stat-l"><i class="bi bi-calendar-check me-1"></i>Today</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n" style="color:#1d4ed8;">@(stats?.Scheduled ?? 0)</div>
+            <div class="stat-l"><i class="bi bi-clock me-1"></i>Upcoming</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat">
+            <div class="stat-n text-danger">@(stats?.Cancelled ?? 0)</div>
+            <div class="stat-l"><i class="bi bi-x-circle me-1"></i>Cancelled</div>
+        </div>
+    </div>
 </div>
 
 <div class="card mb-3">
@@ -47,7 +67,15 @@
         {
             <table class="table table-hover mb-0">
                 <thead>
-                    <tr><th class="ps-3">#</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th></tr>
+                    <tr>
+                        <th class="ps-3">#</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach (var a in Model)

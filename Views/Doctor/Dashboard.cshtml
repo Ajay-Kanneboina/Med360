@@ -2,9 +2,9 @@
     Layout = "_Layout";
     ViewData["Title"] = "Doctor Dashboard";
     var recentComplaints = ViewBag.RecentComplaints as List<MediCore.Models.Complaint> ?? new();
-    var recentRecords    = ViewBag.RecentRecords    as List<MediCore.Models.Record>    ?? new();
-    var priorityPats     = ViewBag.PriorityPatients as List<MediCore.Models.Patient>   ?? new();
-    var doctorName       = Context.Session.GetString("UserName") ?? "Doctor";
+    var recentRecords = ViewBag.RecentRecords as List<MediCore.Models.Record> ?? new();
+    var priorityPats = ViewBag.PriorityPatients as List<MediCore.Models.Patient> ?? new();
+    var doctorName = Context.Session.GetString("UserName") ?? "Doctor";
 }
 
 <p class="page-s">Welcome back, Dr. @doctorName — here's your clinical overview.</p>
@@ -39,8 +39,8 @@
 <div class="sbox mb-4">
     <div class="slabel">Quick Actions</div>
     <div class="d-flex gap-2 flex-wrap">
-        <a href="/Doctor/Patients"                class="btn btn-sm btn-primary"><i class="bi bi-people me-1"></i>All Patients</a>
-        <a href="/Doctor/Complaints"              class="btn btn-sm btn-outline-danger"><i class="bi bi-chat-square-text me-1"></i>All Complaints</a>
+        <a href="/Doctor/Patients" class="btn btn-sm btn-primary"><i class="bi bi-people me-1"></i>All Patients</a>
+        <a href="/Doctor/Complaints" class="btn btn-sm btn-outline-danger"><i class="bi bi-chat-square-text me-1"></i>All Complaints</a>
         <a href="/Doctor/Complaints?filter=unread" class="btn btn-sm btn-outline-warning"><i class="bi bi-envelope-exclamation me-1"></i>Unread</a>
     </div>
 </div>
@@ -77,6 +77,7 @@
                                 <td>
                                     @if (!c.IsRead)                  { <span class="pill pill-a">Unread</span> }
                                     else if (c.Status == "Reviewed") { <span class="pill pill-d">Reviewed</span> }
+                                    else if (c.Status == "Resolved") { <span class="pill pill-x">Resolved</span> }
                                     else                             { <span class="pill pill-a">Active</span> }
                                 </td>
                                 <td><a href="/Doctor/ViewComplaint/@c.Id" class="btn btn-sm btn-outline-primary">View</a></td>

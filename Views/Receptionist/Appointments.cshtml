@@ -113,12 +113,15 @@
                             @if (a.Status != "Cancelled" && a.Status != "Completed")
                             {
                                 <div class="d-flex gap-1 flex-wrap">
-                                    <form method="post" action="/Receptionist/UpdateAppointmentStatus">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@a.Id" />
-                                        <input type="hidden" name="status" value="Confirmed" />
-                                        <button class="btn btn-sm btn-outline-primary py-0" style="font-size:.73rem;">Confirm</button>
-                                    </form>
+                                    @if (a.Status == "Scheduled")
+                                    {
+                                        <form method="post" action="/Receptionist/UpdateAppointmentStatus">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@a.Id" />
+                                            <input type="hidden" name="status" value="Confirmed" />
+                                            <button class="btn btn-sm btn-outline-primary py-0" style="font-size:.73rem;">Confirm</button>
+                                        </form>
+                                    }
                                     <form method="post" action="/Receptionist/UpdateAppointmentStatus">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@a.Id" />

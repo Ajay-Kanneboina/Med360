@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <p class="page-s mb-0">Your registered personal and clinical information.</p>
     <div>
-        <button id="btn-edit"   class="btn-g"><i class="bi bi-pencil me-1"></i>Edit Profile</button>
+        <button id="btn-edit" class="btn-g"><i class="bi bi-pencil me-1"></i>Edit Profile</button>
         <button id="btn-cancel" class="btn btn-outline-secondary" style="display:none;">Cancel</button>
     </div>
 </div>
@@ -40,9 +40,18 @@
                 </div>
 
                 <div class="card-body p-3 js-view">
-                    <div class="irow"><span class="ilbl">Date of Birth</span><span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span></div>
-                    <div class="irow"><span class="ilbl">Gender</span><span>@(Model.Gender ?? "—")</span></div>
-                    <div class="irow"><span class="ilbl">Blood Group</span><span>@(Model.BloodGroup ?? "—")</span></div>
+                    <div class="irow">
+                        <span class="ilbl">Date of Birth</span>
+                        <span>@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="irow">
+                        <span class="ilbl">Gender</span>
+                        <span>@(Model.Gender ?? "—")</span>
+                    </div>
+                    <div class="irow">
+                        <span class="ilbl">Blood Group</span>
+                        <span>@(Model.BloodGroup ?? "—")</span>
+                    </div>
                 </div>
 
                 <div class="card-body p-3 js-edit" style="display:none;">
@@ -81,10 +90,22 @@
                 </div>
 
                 <div class="card-body p-3 js-view">
-                    <div class="irow"><span class="ilbl"><i class="bi bi-telephone me-1"></i>Phone</span><span>@(Model.Phone ?? "—")</span></div>
-                    <div class="irow"><span class="ilbl"><i class="bi bi-envelope me-1"></i>Email</span><span>@(Model.Email ?? "—")</span></div>
-                    <div class="irow"><span class="ilbl"><i class="bi bi-geo-alt me-1"></i>Address</span><span>@(Model.Address ?? "—")</span></div>
-                    <div class="irow"><span class="ilbl"><i class="bi bi-person-heart me-1"></i>Emergency</span><span>@(Model.EmergencyContact ?? "—")</span></div>
+                    <div class="irow">
+                        <span class="ilbl"><i class="bi bi-telephone me-1"></i>Phone</span>
+                        <span>@(Model.Phone ?? "—")</span>
+                    </div>
+                    <div class="irow">
+                        <span class="ilbl"><i class="bi bi-envelope me-1"></i>Email</span>
+                        <span>@(Model.Email ?? "—")</span>
+                    </div>
+                    <div class="irow">
+                        <span class="ilbl"><i class="bi bi-geo-alt me-1"></i>Address</span>
+                        <span>@(Model.Address ?? "—")</span>
+                    </div>
+                    <div class="irow">
+                        <span class="ilbl"><i class="bi bi-person-heart me-1"></i>Emergency</span>
+                        <span>@(Model.EmergencyContact ?? "—")</span>
+                    </div>
                 </div>
 
                 <div class="card-body p-3 js-edit" style="display:none;">
@@ -168,11 +189,11 @@
 
 <script>
     (function () {
-        const btnEdit   = document.getElementById('btn-edit');
+        const btnEdit = document.getElementById('btn-edit');
         const btnCancel = document.getElementById('btn-cancel');
         const btnCancel2 = document.getElementById('btn-cancel-2');
-        const viewEls  = document.querySelectorAll('.js-view');
-        const editEls  = document.querySelectorAll('.js-edit');
+        const viewEls = document.querySelectorAll('.js-view');
+        const editEls = document.querySelectorAll('.js-edit');
 
         function setMode(editing) {
             viewEls.forEach(el => el.style.display = editing ? 'none' : '');
@@ -182,22 +203,22 @@
                     el.style.setProperty('display', 'flex', 'important');
                 }
             });
-            btnEdit.style.display   = editing ? 'none' : '';
-            btnCancel.style.display = editing ? ''     : 'none';
+            btnEdit.style.display = editing ? 'none' : '';
+            btnCancel.style.display = editing ? '' : 'none';
         }
 
-        btnEdit.addEventListener('click',    () => setMode(true));
-        btnCancel.addEventListener('click',  () => { setMode(false); location.reload(); });
+        btnEdit.addEventListener('click', () => setMode(true));
+        btnCancel.addEventListener('click', () => { setMode(false); location.reload(); });
         btnCancel2.addEventListener('click', () => { setMode(false); location.reload(); });
 
         const emailRe = /^[^\s@@]+@@[^\s@@]+\.[a-zA-Z]{2,}$/;
         const phoneInput = document.getElementById('profile-phone');
         const emailInput = document.getElementById('profile-email');
-        const phoneErr   = document.getElementById('profile-phone-err');
-        const emailErr   = document.getElementById('profile-email-err');
+        const phoneErr = document.getElementById('profile-phone-err');
+        const emailErr = document.getElementById('profile-email-err');
 
         function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
-        function clearErr(el)     { el.textContent = ''; el.style.display = 'none'; }
+        function clearErr(el) { el.textContent = ''; el.style.display = 'none'; }
 
         phoneInput.addEventListener('input', function () {
             this.value = this.value.replace(/\D/g, '').slice(0, 10);

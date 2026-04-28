@@ -6,15 +6,15 @@ namespace MediCore.Controllers
 {
     public class PatientController : Controller
     {
-        private readonly IPatientService     _patientService;
-        private readonly IAuditService       _audit;
+        private readonly IPatientService  _patientService;
+        private readonly IAuditService  _audit;
         private readonly IAppointmentService _apptService;
 
         public PatientController(IPatientService patientService, IAuditService audit, IAppointmentService apptService)
         {
             _patientService = patientService;
-            _audit          = audit;
-            _apptService    = apptService;
+            _audit = audit;
+            _apptService = apptService;
         }
 
         private bool IsPatient() =>
@@ -74,42 +74,57 @@ namespace MediCore.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult SubmitComplaint(string description, string? additionalNotes)
+        public IActionResult SubmitComplaint(Complaint input)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
-            if (string.IsNullOrWhiteSpace(description))
+            if (string.IsNullOrWhiteSpace(input.Description))
             {
                 ViewBag.Error = "Please describe your problem.";
                 return View();
             }
 
-            _patientService.SubmitComplaint(Pid(), description, additionalNotes);
+            _patientService.SubmitComplaint(Pid(), input);
 
             var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
-            var shortDesc   = description.Length > 60 ? description[..60] + "…" : description;
-            _audit.Log(patientName, "Complaint Submitted", shortDesc, "Complaint", HttpContext.Session.GetInt32("UserId"));
+            var shortDesc  = input.Description.Length > 60 ? input.Description[..60] + "…" : input.Description;
+
+            _audit.Log(new AuditLog
+            {
+                Actor    = patientName,
+                Action   = "Complaint Submitted",
+                Target   = shortDesc,
+                Category = "Complaint",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = "Problem submitted. A doctor will respond soon.";
             return RedirectToAction(nameof(MyComplaints));
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult EditComplaint(int id, string description, string? additionalNotes)
+        public IActionResult EditComplaint(int id, Complaint input)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
-            if (string.IsNullOrWhiteSpace(description))
+            if (string.IsNullOrWhiteSpace(input.Description))
             {
                 TempData["Error"] = "Please describe your problem.";
                 return RedirectToAction(nameof(MyComplaints));
             }
 
-            if (!_patientService.UpdateComplaint(id, Pid(), description, additionalNotes))
+            if (!_patientService.UpdateComplaint(id, Pid(), input))
                 return NotFound();
 
             var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
-            _audit.Log(patientName, "Complaint Updated", $"Complaint #{id}", "Complaint", HttpContext.Session.GetInt32("UserId"));
+            _audit.Log(new AuditLog
+            {
+                Actor    = patientName,
+                Action   = "Complaint Updated",
+                Target   = $"Complaint #{id}",
+                Category = "Complaint",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = "Problem updated. The doctor will be notified.";
             return RedirectToAction(nameof(MyComplaints));
@@ -126,20 +141,11 @@ namespace MediCore.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult EditProfile(string?   phone,
-                                         string?   email,
-                                         string?   address,
-                                         string?   emergencyContact,
-                                         DateTime? dateOfBirth,
-                                         string?   gender,
-                                         string?   bloodGroup,
-                                         string?   medicalHistory)
+        public IActionResult EditProfile(Patient input)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
-            if (!_patientService.UpdateProfile(Pid(),
-                    phone, email, address, emergencyContact,
-                    dateOfBirth, gender, bloodGroup, medicalHistory))
+            if (!_patientService.UpdateProfile(Pid(), input))
                 return View("NoRecord");
 
             TempData["Success"] = "Your profile has been updated.";
@@ -160,22 +166,29 @@ namespace MediCore.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult SendAppointmentRequest(string message, string? preferredDate, string? preferredTime)
+        public IActionResult SendAppointmentRequest(AppointmentRequest input)
         {
             if (!IsPatient()) return RedirectToAction("Login", "Account");
 
-            if (string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrWhiteSpace(input.Message))
             {
-                ViewBag.Error        = "Please describe what kind of appointment you need.";
+                ViewBag.Error = "Please describe what kind of appointment you need.";
                 ViewBag.PastRequests = _apptService.GetPatientRequests(Pid());
                 return View();
             }
 
-            _apptService.SendRequest(Pid(), message, preferredDate, preferredTime);
+            _apptService.SendRequest(Pid(), input);
 
             var patientName = HttpContext.Session.GetString("UserName") ?? "Patient";
-            _audit.Log(patientName, "Appointment Requested", message.Length > 60 ? message[..60] + "…" : message,
-                       "Appointment", HttpContext.Session.GetInt32("UserId"));
+
+            _audit.Log(new AuditLog
+            {
+                Actor    = patientName,
+                Action   = "Appointment Requested",
+                Target   = input.Message.Length > 60 ? input.Message[..60] + "…" : input.Message,
+                Category = "Appointment",
+                UserId   = HttpContext.Session.GetInt32("UserId")
+            });
 
             TempData["Success"] = "Your request has been sent to the receptionist. They will book your appointment shortly.";
             return RedirectToAction(nameof(MyAppointments));
